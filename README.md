@@ -3,6 +3,7 @@
 Standalone workspace for the `hashtree.cc` site/app and the local Hashtree TypeScript packages it currently depends on.
 
 Source: <https://git.iris.to/#/npub1xdhnr9mrv47kkrn95k6cwecearydeh8e895990n3acntwvmgk2dsdeeycm/hashtree-cc>
+Built on Hashtree: <https://git.iris.to/#/npub1xdhnr9mrv47kkrn95k6cwecearydeh8e895990n3acntwvmgk2dsdeeycm/hashtree>
 
 ## Layout
 
