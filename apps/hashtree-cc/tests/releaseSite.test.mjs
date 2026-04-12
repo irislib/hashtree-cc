@@ -7,7 +7,7 @@ test('uses the built-in Worker default for hashtree.cc', () => {
   const parsed = parseArgs([]);
 
   assert.equal(parsed.workerName, 'hashtree-cc');
-  assert.equal(parsed.treeName, 'hashtree-cc');
+  assert.equal(parsed.treeName, 'hashtree-cc-site');
   assert.deepEqual(parsed.routes, []);
   assert.deepEqual(parsed.domains, []);
 });
@@ -24,7 +24,7 @@ test('supports switching hashtree.cc releases back to Pages explicitly', () => {
 test('builds a Worker release plan in build-test-publish-deploy order', () => {
   const plan = createReleasePlan({
     workerName: 'hashtree-cc',
-    treeName: 'hashtree-cc',
+    treeName: 'hashtree-cc-site',
     routes: [],
     domains: [],
     skipCloudflare: false,
@@ -52,7 +52,7 @@ test('builds a Worker release plan in build-test-publish-deploy order', () => {
 test('adds explicit routes and domains to the Worker deploy command', () => {
   const plan = createReleasePlan({
     workerName: 'hashtree-cc',
-    treeName: 'hashtree-cc',
+    treeName: 'hashtree-cc-site',
     routes: ['hashtree.cc/*'],
     domains: ['hashtree.cc'],
     skipCloudflare: false,
@@ -85,7 +85,7 @@ test('runs hashtree publish and Worker deploy in parallel after tests', async ()
   await runRelease(
     {
       workerName: 'hashtree-cc',
-      treeName: 'hashtree-cc',
+      treeName: 'hashtree-cc-site',
       routes: [],
       domains: [],
       skipCloudflare: false,
@@ -101,7 +101,7 @@ test('runs hashtree publish and Worker deploy in parallel after tests', async ()
         if (step.id === 'publish') {
           return {
             status: 0,
-            stdout: 'published: npub1example/hashtree-cc\nnhash1ace',
+            stdout: 'published: npub1example/hashtree-cc-site\nnhash1ace',
             stderr: '',
           };
         }
@@ -119,7 +119,7 @@ test('returns parsed hashtree publish data and Worker target on success', async 
   const result = await runRelease(
     {
       workerName: 'hashtree-cc',
-      treeName: 'hashtree-cc',
+      treeName: 'hashtree-cc-site',
       routes: [],
       domains: [],
       skipCloudflare: false,
@@ -129,7 +129,7 @@ test('returns parsed hashtree publish data and Worker target on success', async 
       if (step.id === 'publish') {
         return {
           status: 0,
-          stdout: 'published: npub1example/hashtree-cc\nnhash1ace',
+          stdout: 'published: npub1example/hashtree-cc-site\nnhash1ace',
           stderr: '',
         };
       }
@@ -140,19 +140,19 @@ test('returns parsed hashtree publish data and Worker target on success', async 
 
   assert.deepEqual(result.publish, {
     nhash: 'nhash1ace',
-    publishedRef: 'npub1example/hashtree-cc',
+    publishedRef: 'npub1example/hashtree-cc-site',
   });
   assert.equal(result.workerName, 'hashtree-cc');
   assert.equal(result.pagesProject, null);
 });
 
 test('parses htree publish output defensively', () => {
-  assert.deepEqual(parsePublishOutput('published: npub1foo/hashtree-cc\nnhash1ace'), {
+  assert.deepEqual(parsePublishOutput('published: npub1foo/hashtree-cc-site\nnhash1ace'), {
     nhash: 'nhash1ace',
-    publishedRef: 'npub1foo/hashtree-cc',
+    publishedRef: 'npub1foo/hashtree-cc-site',
   });
   assert.throws(
-    () => parsePublishOutput('published: npub1foo/hashtree-cc'),
+    () => parsePublishOutput('published: npub1foo/hashtree-cc-site'),
     /Publish succeeded but no nhash was found in htree output/,
   );
 });

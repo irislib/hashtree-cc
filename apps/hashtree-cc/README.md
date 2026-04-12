@@ -19,7 +19,7 @@ pnpm run release:site
 
 `pnpm run test:portable` builds the site, verifies the generated `dist/index.html` stays portable for `htree://` delivery, and smoke-tests that exact build from a nested path so root-absolute asset URLs fail before publish.
 
-`pnpm run release:site` runs the same build and portable checks, publishes the resulting `dist/` directory to hashtree, and then deploys that same directory to a Cloudflare Worker service named `hashtree-cc` by default.
+`pnpm run release:site` runs the same build and portable checks, publishes the resulting `dist/` directory to the mutable site ref `htree://self/hashtree-cc-site`, and then deploys that same directory to a Cloudflare Worker service named `hashtree-cc` by default.
 
 The publish/release scripts use an installed `htree` by default. Set
 `HTREE_BIN`, `HASHTREE_RUST_DIR`, or `HASHTREE_REPO_ROOT` when you want to run

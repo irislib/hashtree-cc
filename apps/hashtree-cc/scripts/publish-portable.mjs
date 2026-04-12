@@ -3,7 +3,7 @@ import path from 'node:path';
 import { appDir, resolveHtreeCommand } from './hashtreePaths.mjs';
 
 const distDir = path.join(appDir, 'dist');
-const [command, ...args] = resolveHtreeCommand('add', '.', '--publish', 'hashtree-cc');
+const [command, ...args] = resolveHtreeCommand('add', '.', '--publish', 'hashtree-cc-site');
 
 const result = spawnSync(command, args, {
   cwd: distDir,

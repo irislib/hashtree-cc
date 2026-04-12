@@ -12,7 +12,7 @@ const defaultWorkerCompatibilityDate = '2026-03-19';
 export const releaseProfile = {
   appName: 'hashtree.cc',
   distDir: 'dist',
-  treeName: 'hashtree-cc',
+  treeName: 'hashtree-cc-site',
   defaultWorkerName: 'hashtree-cc',
   workerNameEnv: 'CF_WORKER_NAME_HASHTREE_CC',
   pagesProjectEnv: 'CF_PAGES_PROJECT_HASHTREE_CC',
