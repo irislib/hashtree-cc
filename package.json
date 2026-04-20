@@ -24,11 +24,12 @@
   },
   "pnpm": {
     "overrides": {
-      "@hashtree/core": "workspace:*",
-      "@hashtree/dexie": "workspace:*",
-      "@hashtree/index": "workspace:*",
-      "@hashtree/nostr": "workspace:*",
-      "@hashtree/worker": "workspace:*",
+      "@hashtree/collection": "link:../hashtree/ts/packages/hashtree-collection",
+      "@hashtree/core": "link:../hashtree/ts/packages/hashtree",
+      "@hashtree/dexie": "link:../hashtree/ts/packages/hashtree-dexie",
+      "@hashtree/index": "link:../hashtree/ts/packages/hashtree-index",
+      "@hashtree/nostr": "link:../hashtree/ts/packages/hashtree-nostr",
+      "@hashtree/worker": "link:../hashtree/ts/packages/hashtree-worker",
       "ndk": "workspace:*",
       "ndk-cache": "workspace:*",
       "nostr-social-graph": "workspace:*"

@@ -5,11 +5,12 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@hashtree/core': workspace:*
-  '@hashtree/dexie': workspace:*
-  '@hashtree/index': workspace:*
-  '@hashtree/nostr': workspace:*
-  '@hashtree/worker': workspace:*
+  '@hashtree/collection': link:../hashtree/ts/packages/hashtree-collection
+  '@hashtree/core': link:../hashtree/ts/packages/hashtree
+  '@hashtree/dexie': link:../hashtree/ts/packages/hashtree-dexie
+  '@hashtree/index': link:../hashtree/ts/packages/hashtree-index
+  '@hashtree/nostr': link:../hashtree/ts/packages/hashtree-nostr
+  '@hashtree/worker': link:../hashtree/ts/packages/hashtree-worker
   ndk: workspace:*
   ndk-cache: workspace:*
   nostr-social-graph: workspace:*
@@ -21,14 +22,14 @@ importers:
   apps/hashtree-cc:
     dependencies:
       '@hashtree/core':
-        specifier: workspace:*
-        version: link:../../packages/hashtree
+        specifier: link:../../../hashtree/ts/packages/hashtree
+        version: link:../../../hashtree/ts/packages/hashtree
       '@hashtree/nostr':
-        specifier: workspace:*
-        version: link:../../packages/hashtree-nostr
+        specifier: link:../../../hashtree/ts/packages/hashtree-nostr
+        version: link:../../../hashtree/ts/packages/hashtree-nostr
       '@hashtree/worker':
-        specifier: workspace:*
-        version: link:../../packages/hashtree-worker
+        specifier: link:../../../hashtree/ts/packages/hashtree-worker
+        version: link:../../../hashtree/ts/packages/hashtree-worker
       minidenticons:
         specifier: ^4.2.1
         version: 4.2.1
@@ -116,8 +117,8 @@ importers:
   packages/hashtree-dexie:
     dependencies:
       '@hashtree/core':
-        specifier: workspace:*
-        version: link:../hashtree
+        specifier: link:../../../hashtree/ts/packages/hashtree
+        version: link:../../../hashtree/ts/packages/hashtree
       dexie:
         specifier: ^4.2.1
         version: 4.4.2
@@ -135,8 +136,8 @@ importers:
   packages/hashtree-index:
     dependencies:
       '@hashtree/core':
-        specifier: workspace:*
-        version: link:../hashtree
+        specifier: link:../../../hashtree/ts/packages/hashtree
+        version: link:../../../hashtree/ts/packages/hashtree
     devDependencies:
       typescript:
         specifier: ^5.3.0
@@ -148,11 +149,11 @@ importers:
   packages/hashtree-nostr:
     dependencies:
       '@hashtree/core':
-        specifier: workspace:*
-        version: link:../hashtree
+        specifier: link:../../../hashtree/ts/packages/hashtree
+        version: link:../../../hashtree/ts/packages/hashtree
       '@hashtree/index':
-        specifier: workspace:*
-        version: link:../hashtree-index
+        specifier: link:../../../hashtree/ts/packages/hashtree-index
+        version: link:../../../hashtree/ts/packages/hashtree-index
       '@msgpack/msgpack':
         specifier: ^3.1.2
         version: 3.1.3
@@ -179,14 +180,14 @@ importers:
   packages/hashtree-worker:
     dependencies:
       '@hashtree/core':
-        specifier: workspace:*
-        version: link:../hashtree
+        specifier: link:../../../hashtree/ts/packages/hashtree
+        version: link:../../../hashtree/ts/packages/hashtree
       '@hashtree/dexie':
-        specifier: workspace:*
-        version: link:../hashtree-dexie
+        specifier: link:../../../hashtree/ts/packages/hashtree-dexie
+        version: link:../../../hashtree/ts/packages/hashtree-dexie
       '@hashtree/nostr':
-        specifier: workspace:*
-        version: link:../hashtree-nostr
+        specifier: link:../../../hashtree/ts/packages/hashtree-nostr
+        version: link:../../../hashtree/ts/packages/hashtree-nostr
       '@msgpack/msgpack':
         specifier: ^3.1.2
         version: 3.1.3
@@ -303,8 +304,8 @@ importers:
         version: 2.8.6
     devDependencies:
       '@hashtree/core':
-        specifier: workspace:*
-        version: link:../hashtree
+        specifier: link:../../../hashtree/ts/packages/hashtree
+        version: link:../../../hashtree/ts/packages/hashtree
       '@nostr-dev-kit/ndk':
         specifier: ^2.14.5
         version: 2.18.1(nostr-tools@2.23.3(typescript@5.9.3))
