@@ -3,6 +3,7 @@ import {
   WebRTCController,
   WebRTCProxy,
   SIGNALING_KIND,
+  createWebRTCWorkerP2PProvider,
   createSignalingFilters,
   decodeSignalingEvent,
   sendSignalingMessage,
@@ -16,10 +17,9 @@ import { finalizeEvent, generateSecretKey, getPublicKey } from 'nostr-tools/pure
 import { writable } from 'svelte/store';
 import {
   blossomBandwidthStore,
-  getBlob,
   getBlobForPeer,
   putBlob,
-  setP2PFetchHandler,
+  setP2PProvider,
 } from './workerClient';
 import { settingsStore } from './settings';
 import { getEffectiveRelayUrls } from './irisRuntimeNetwork';
@@ -363,19 +363,14 @@ async function withLocalStoreReadGuard<T>(read: () => Promise<T>): Promise<T> {
   }
 }
 
-async function fetchFromPeersForWorker(hashHex: string): Promise<Uint8Array | null> {
-  if (localStoreReadDepth > 0) {
-    return null;
-  }
-
-  await initP2P();
-  if (!controller) {
-    return null;
-  }
-  return controller.get(fromHex(hashHex));
-}
-
-setP2PFetchHandler(fetchFromPeersForWorker);
+setP2PProvider(createWebRTCWorkerP2PProvider({
+  getController: () => controller,
+  ensureController: async () => {
+    await initP2P();
+    return controller;
+  },
+  canFetch: () => localStoreReadDepth === 0,
+}));
 
 export async function initP2P(): Promise<void> {
   if (initPromise) return initPromise;
