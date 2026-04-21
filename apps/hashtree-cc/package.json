@@ -12,7 +12,7 @@
   "type": "module",
   "packageManager": "pnpm@10.23.0",
   "scripts": {
-    "build:deps": "pnpm --dir ../../../hashtree/ts --filter @hashtree/core build && pnpm --dir ../../../hashtree/ts --filter @hashtree/index build && pnpm --dir ../../../hashtree/ts --filter @hashtree/collection build && pnpm --dir ../../../hashtree/ts --filter @hashtree/dexie build && pnpm --dir ../../../hashtree/ts --filter @hashtree/nostr build && pnpm --dir ../.. --filter ndk build && pnpm --dir ../.. --filter ndk-cache build && pnpm --dir ../.. --filter nostr-social-graph build && pnpm --dir ../../../hashtree/ts --filter @hashtree/worker build",
+    "build:deps": "pnpm --dir ../../../hashtree/ts --filter @hashtree/core build && pnpm --dir ../../../hashtree/ts --filter @hashtree/index build && pnpm --dir ../../../hashtree/ts --filter @hashtree/collection build && pnpm --dir ../../../hashtree/ts --filter @hashtree/dexie build && pnpm --dir ../../../hashtree/ts --filter @hashtree/mesh build && pnpm --dir ../../../hashtree/ts --filter @hashtree/nostr build && pnpm --dir ../.. --filter ndk build && pnpm --dir ../.. --filter ndk-cache build && pnpm --dir ../.. --filter nostr-social-graph build",
     "dev": "pnpm run build:deps && vite",
     "build": "pnpm run build:deps && vite build",
     "preview": "vite preview",
@@ -27,7 +27,7 @@
   "dependencies": {
     "@hashtree/core": "link:../../../hashtree/ts/packages/hashtree",
     "@hashtree/nostr": "link:../../../hashtree/ts/packages/hashtree-nostr",
-    "@hashtree/worker": "link:../../../hashtree/ts/packages/hashtree-worker",
+    "@hashtree/worker": "0.2.13",
     "minidenticons": "^4.2.1",
     "nostr-tools": "^2.18.2",
     "qrcode": "^1.5.4"

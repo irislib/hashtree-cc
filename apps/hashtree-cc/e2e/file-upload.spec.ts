@@ -27,7 +27,7 @@ test('developers tab shows git demo video player', async ({ page }) => {
 
   const video = page.getByTestId('git-demo-video');
   await expect(video).toBeVisible();
-  await expect(video).toHaveAttribute('src', /\/htree\/nhash1qqsqmafutt4u7g4x7cyx0w0k84gs7txg54v7sygkm3aspld3h7ehhyg9ypzx8wcsnd63spv9d3scr4zst2s48mv0yl36lj2c02a6vlms607nkqysxg5\/htree\.mp4\?htree_c=/);
+  await expect(video).toHaveAttribute('src', /\/htree\/nhash1qqsqmafutt4u7g4x7cyx0w0k84gs7txg54v7sygkm3aspld3h7ehhyg9ypzx8wcsnd63spv9d3scr4zst2s48mv0yl36lj2c02a6vlms607nkqysxg5\/htree\.mp4\?htree_c=.*htree_t=video%2Fmp4/);
   await expect(video).toHaveAttribute('controls', '');
   await expect(video).not.toHaveAttribute('autoplay', '');
   const box = await video.boundingBox();
@@ -118,6 +118,52 @@ test('file upload navigates to viewer with nhash URL', async ({ page }) => {
   // Text content is shown
   await expect(page.getByTestId('viewer-text')).toBeVisible();
   await expect(page.getByTestId('viewer-text')).toContainText('hello hashtree test file');
+});
+
+test('service worker preserves suffix byte ranges for immutable /htree files', async ({ page }) => {
+  const fileName = 'range.bin';
+  const fileContent = Buffer.from(Uint8Array.from({ length: 32 }, (_, index) => index));
+  const expectedHash = createHash('sha256').update(fileContent).digest('hex');
+
+  await mockBlossom(page, expectedHash, fileContent);
+  await page.goto('/');
+
+  await page.getByTestId('file-input').setInputFiles({
+    name: fileName,
+    mimeType: 'application/octet-stream',
+    buffer: fileContent,
+  });
+
+  await expect(page.getByTestId('file-viewer')).toBeVisible({ timeout: 10000 });
+  await expect(page.getByTestId('viewer-download')).toBeVisible();
+
+  const nhash = await page.evaluate(() => {
+    const match = window.location.hash.match(/^#\/([^/]+)\//);
+    return match?.[1] ?? null;
+  });
+  expect(nhash).toBeTruthy();
+
+  const response = await page.evaluate(async ({ nhash, fileName }) => {
+    const encodedFileName = encodeURIComponent(fileName);
+    const result = await fetch(`/htree/${nhash}/${encodedFileName}`, {
+      headers: {
+        Range: 'bytes=-5',
+      },
+    });
+    return {
+      status: result.status,
+      acceptRanges: result.headers.get('accept-ranges'),
+      contentLength: result.headers.get('content-length'),
+      contentRange: result.headers.get('content-range'),
+      bytes: Array.from(new Uint8Array(await result.arrayBuffer())),
+    };
+  }, { nhash, fileName });
+
+  expect(response.status).toBe(206);
+  expect(response.acceptRanges).toBe('bytes');
+  expect(response.contentLength).toBe('5');
+  expect(response.contentRange).toBe('bytes 27-31/32');
+  expect(response.bytes).toEqual(Array.from(fileContent.subarray(fileContent.length - 5)));
 });
 
 test('file upload uses streaming path without File.arrayBuffer', async ({ page }) => {

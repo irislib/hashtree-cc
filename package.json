@@ -28,8 +28,9 @@
       "@hashtree/core": "link:../hashtree/ts/packages/hashtree",
       "@hashtree/dexie": "link:../hashtree/ts/packages/hashtree-dexie",
       "@hashtree/index": "link:../hashtree/ts/packages/hashtree-index",
+      "@hashtree/mesh": "link:../hashtree/ts/packages/hashtree-mesh",
       "@hashtree/nostr": "link:../hashtree/ts/packages/hashtree-nostr",
-      "@hashtree/worker": "link:../hashtree/ts/packages/hashtree-worker",
+      "@hashtree/worker": "0.2.13",
       "ndk": "workspace:*",
       "ndk-cache": "workspace:*",
       "nostr-social-graph": "workspace:*"

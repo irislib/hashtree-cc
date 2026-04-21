@@ -1,15 +1,12 @@
 import { fromHex, toHex, type Store } from '@hashtree/core';
 import {
-  createSimplePoolSignalingSender,
+  createManagedNostrMeshSession,
+  createSecretKeyEventSigner,
+  createSecretKeyGiftUnwrapper,
   ManagedWebRTCMeshHost,
-  type GiftSeal,
-  type SignalingInnerEvent,
-  type SignalingEventLike,
-  type SignalingTemplate,
 } from '@hashtree/worker/p2p';
 import { DEFAULT_RELAYS as DEFAULT_NOSTR_RELAYS } from '@hashtree/nostr';
-import { type Event, nip44 } from 'nostr-tools';
-import { finalizeEvent, generateSecretKey, getPublicKey } from 'nostr-tools/pure';
+import { generateSecretKey, getPublicKey } from 'nostr-tools/pure';
 import { writable } from 'svelte/store';
 import {
   blossomBandwidthStore,
@@ -204,55 +201,6 @@ function setupBlossomBandwidthSync(): void {
   });
 }
 
-async function signLocalEvent(template: SignalingTemplate): Promise<Event> {
-  if (!secretKey) {
-    throw new Error('No local secret key available for WebRTC signaling');
-  }
-  return finalizeEvent(template, secretKey) as Event;
-}
-
-async function giftWrapMessage(innerEvent: SignalingInnerEvent, recipientPubkey: string): Promise<Event> {
-  if (!secretKey || !publicKey) {
-    throw new Error('No local keypair available for WebRTC signaling');
-  }
-
-  const seal: GiftSeal = {
-    pubkey: publicKey,
-    kind: innerEvent.kind,
-    content: innerEvent.content,
-    tags: innerEvent.tags,
-  };
-
-  const ephemeralSecretKey = generateSecretKey();
-  const createdAt = Math.floor(Date.now() / 1000);
-  const expiration = createdAt + 5 * 60;
-  const conversationKey = nip44.v2.utils.getConversationKey(ephemeralSecretKey, recipientPubkey);
-  const encryptedContent = nip44.v2.encrypt(JSON.stringify(seal), conversationKey);
-
-  return finalizeEvent({
-    kind: 25050,
-    created_at: createdAt,
-    tags: [
-      ['p', recipientPubkey],
-      ['expiration', String(expiration)],
-    ],
-    content: encryptedContent,
-  }, ephemeralSecretKey) as Event;
-}
-
-async function giftUnwrapEvent(event: SignalingEventLike): Promise<GiftSeal | null> {
-  if (!secretKey) {
-    return null;
-  }
-  try {
-    const conversationKey = nip44.v2.utils.getConversationKey(secretKey, event.pubkey);
-    const decrypted = nip44.v2.decrypt(event.content, conversationKey);
-    return JSON.parse(decrypted) as GiftSeal;
-  } catch {
-    return null;
-  }
-}
-
 async function createLocalStoreAdapter(): Promise<Store> {
   return {
     put: async (hash, data) => {
@@ -277,26 +225,23 @@ function getSessionSignature(): string {
 }
 
 async function syncSession(force = false): Promise<void> {
-  if (!publicKey) {
+  if (!publicKey || !secretKey) {
     return;
   }
   const localStore = await createLocalStoreAdapter();
-  await meshHost.setSession({
+  await meshHost.setSession(createManagedNostrMeshSession({
     signature: getSessionSignature(),
     pubkey: publicKey,
     relayUrls: currentRelays,
     localStore,
-    createSendSignaling: createSimplePoolSignalingSender({
-      signEvent: signLocalEvent,
-      giftWrap: giftWrapMessage,
-      publishMode: 'best-effort',
-    }),
-    unwrapGift: giftUnwrapEvent,
+    signEvent: createSecretKeyEventSigner(secretKey),
+    unwrapGift: createSecretKeyGiftUnwrapper(secretKey),
+    publishMode: 'best-effort',
     getFollows: () => new Set<string>(),
     requestTimeoutMs: REQUEST_TIMEOUT_MS,
     closeLocalStore: async () => undefined,
     debug: false,
-  }, force);
+  }), force);
   updateDebugState();
 }
 

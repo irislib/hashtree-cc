@@ -1,6 +1,7 @@
 <script lang="ts">
   import { uploadBuffer } from '../lib/blossomStore';
-  import { getMediaClientKey, setupMediaStreaming } from '../lib/mediaStreamingSetup';
+  import { buildImmutableMediaUrl } from '../lib/htreeRuntime';
+  import { ensureHashtreeStreamingReady } from '../lib/workerStreaming';
   import { open as openShareModal } from './ShareModal.svelte';
 
   interface Props {
@@ -33,11 +34,19 @@
       return fileName;
     }
   });
-  // htree_c lets the SW route this request to the correct per-tab media port.
   const htreeUrl = $derived(
-    `/htree/${nhash}/${encodeURIComponent(decodedFileName)}?htree_c=${encodeURIComponent(getMediaClientKey())}`
+    buildImmutableMediaUrl(nhash, decodedFileName, {
+      mimeType: getMimeType(),
+    })
   );
-  const htreeDownloadUrl = $derived(`${htreeUrl}&download=1`);
+  const htreeDownloadUrl = $derived(
+    buildImmutableMediaUrl(nhash, decodedFileName, {
+      mimeType: getMimeType(),
+      query: {
+        download: 1,
+      },
+    })
+  );
   const shareUrl = $derived(`${window.location.origin}/#/${nhash}/${encodeURIComponent(fileName)}`);
 
   function formatSize(bytes: number): string {
@@ -99,12 +108,7 @@
   async function fetchBlob() {
     let streamingReady = false;
     if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
-      streamingReady = await setupMediaStreaming().catch(() => false);
-      if (!streamingReady) {
-        // Give service worker/controller a brief moment to settle on first load.
-        await new Promise((resolve) => setTimeout(resolve, 200));
-        streamingReady = await setupMediaStreaming().catch(() => false);
-      }
+      streamingReady = await ensureHashtreeStreamingReady().catch(() => false);
     }
 
     if (!streamingReady) {

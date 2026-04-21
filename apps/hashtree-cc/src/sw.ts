@@ -16,6 +16,9 @@ declare let self: ServiceWorkerGlobalScope & {
 
 const isTestMode = !!import.meta.env.VITE_TEST_MODE;
 const PORT_TIMEOUT_MS = 60_000;
+const PORT_WAIT_TIMEOUT_MS = 5_000;
+const PORT_RETRY_WAIT_TIMEOUT_MS = 3_000;
+const PORT_WAIT_INTERVAL_MS = 50;
 
 if (!isTestMode) {
   precacheAndRoute(self.__WB_MANIFEST);
@@ -42,6 +45,8 @@ interface HtreeFileRequest {
   path: string;
   start: number;
   end?: number;
+  rangeHeader?: string | null;
+  sizeHint?: number;
   mimeType: string;
   download?: boolean;
   head?: boolean;
@@ -84,6 +89,7 @@ interface PendingRequest {
 
 const workerPorts = new Map<string, MessagePort>();
 const workerPortsByClientKey = new Map<string, MessagePort>();
+const reconnectRequestDeadlines = new Map<string, number>();
 let defaultWorkerPort: MessagePort | null = null;
 let activeDownloadCount = 0;
 
@@ -135,14 +141,23 @@ function guessMimeType(path: string): string {
   return map[ext] || 'application/octet-stream';
 }
 
-function parseRange(rangeHeader: string | null): { start: number; end?: number } {
-  if (!rangeHeader) return { start: 0 };
-  const match = rangeHeader.match(/bytes=(\d*)-(\d*)/);
-  if (!match) return { start: 0 };
-  return {
-    start: match[1] ? Number.parseInt(match[1], 10) : 0,
-    end: match[2] ? Number.parseInt(match[2], 10) : undefined,
-  };
+function normalizeMimeType(value: string | null | undefined): string | null {
+  const trimmed = `${value ?? ''}`.trim().toLowerCase();
+  if (!trimmed || trimmed === 'application/octet-stream') {
+    return null;
+  }
+  if (trimmed === 'audio/mp3') {
+    return 'audio/mpeg';
+  }
+  if (trimmed === 'audio/x-wav') {
+    return 'audio/wav';
+  }
+  return trimmed;
+}
+
+function parsePositiveInteger(value: string | null): number | undefined {
+  const parsed = Number.parseInt(`${value ?? ''}`.trim(), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 }
 
 function addCORSHeaders(response: Response): Response {
@@ -164,6 +179,74 @@ function getPort(clientId?: string | null, clientKey?: string | null): MessagePo
     return workerPorts.get(clientId) || null;
   }
   return defaultWorkerPort;
+}
+
+function dropWorkerPortRegistration(
+  port: MessagePort,
+  clientId?: string | null,
+  clientKey?: string | null,
+): void {
+  if (clientKey && workerPortsByClientKey.get(clientKey) === port) {
+    workerPortsByClientKey.delete(clientKey);
+  }
+  if (clientId && workerPorts.get(clientId) === port) {
+    workerPorts.delete(clientId);
+  }
+  if (defaultWorkerPort === port) {
+    defaultWorkerPort = null;
+  }
+}
+
+function waitForWorkerPort(
+  lookup: () => MessagePort | null,
+  timeoutMs: number = PORT_WAIT_TIMEOUT_MS,
+): Promise<MessagePort | null> {
+  const deadline = Date.now() + timeoutMs;
+  return new Promise<MessagePort | null>((resolve) => {
+    const poll = () => {
+      const port = lookup();
+      if (port) {
+        resolve(port);
+        return;
+      }
+      if (Date.now() >= deadline) {
+        resolve(null);
+        return;
+      }
+      setTimeout(poll, PORT_WAIT_INTERVAL_MS);
+    };
+    poll();
+  });
+}
+
+async function requestWorkerPortReconnect(
+  clientId?: string | null,
+  clientKey?: string | null,
+): Promise<void> {
+  const reconnectKey = `${clientId ?? ''}:${clientKey ?? ''}`;
+  const now = Date.now();
+  const nextAllowedAt = reconnectRequestDeadlines.get(reconnectKey) ?? 0;
+  if (nextAllowedAt > now) {
+    return;
+  }
+  reconnectRequestDeadlines.set(reconnectKey, now + 1_000);
+
+  const matchedClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+  const targetClient = clientId
+    ? matchedClients.find((candidate) => candidate.id === clientId) ?? null
+    : null;
+  const recipients = targetClient ? [targetClient] : matchedClients;
+
+  await Promise.all(recipients.map(async (recipient) => {
+    try {
+      recipient.postMessage({
+        type: 'REQUEST_WORKER_PORT_RECONNECT',
+        clientKey,
+      });
+    } catch {
+      // Ignore reconnect notification failures.
+    }
+  }));
 }
 
 function clearPending(requestId: string): PendingRequest | undefined {
@@ -321,30 +404,56 @@ async function createNhashResponse(
   request: Request,
   clientId?: string | null
 ): Promise<Response> {
-  const clientKey = new URL(request.url).searchParams.get('htree_c');
-  const port = getPort(clientId, clientKey);
-  if (!port) {
-    return new Response('Worker port not available', { status: 503 });
-  }
-
-  const range = parseRange(request.headers.get('Range'));
-  const message: HtreeFileRequest = {
+  const url = new URL(request.url);
+  const clientKey = url.searchParams.get('htree_c');
+  const rangeHeader = request.headers.get('Range');
+  const rangeMatch = rangeHeader ? /bytes=(\d+)-(\d+)?/i.exec(rangeHeader) : null;
+  const mimeType = normalizeMimeType(url.searchParams.get('htree_t')) ?? guessMimeType(filePath);
+  const sizeHint = parsePositiveInteger(url.searchParams.get('htree_s'));
+  const buildMessage = (): HtreeFileRequest => ({
     type: 'hashtree-file',
     requestId: `file_${++requestCounter}`,
     nhash,
     path: filePath,
-    start: range.start,
-    end: range.end,
-    mimeType: guessMimeType(filePath),
-    download: new URL(request.url).searchParams.get('download') === '1',
+    start: rangeMatch ? Number(rangeMatch[1]) : 0,
+    end: rangeMatch && rangeMatch[2] ? Number(rangeMatch[2]) : undefined,
+    rangeHeader,
+    sizeHint,
+    mimeType,
+    download: url.searchParams.get('download') === '1',
     head: request.method === 'HEAD',
-  };
+  });
+
+  let port = getPort(clientId, clientKey);
+  if (!port) {
+    void requestWorkerPortReconnect(clientId, clientKey);
+    port = await waitForWorkerPort(() => getPort(clientId, clientKey));
+    if (!port) {
+      return new Response('Worker port not available', { status: 503 });
+    }
+  }
 
   try {
-    return await serveViaWorker(message, port);
+    return await serveViaWorker(buildMessage(), port);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Streaming failed';
-    return new Response(message, { status: 500 });
+    dropWorkerPortRegistration(port, clientId, clientKey);
+    void requestWorkerPortReconnect(clientId, clientKey);
+
+    const retryPort = await waitForWorkerPort(
+      () => getPort(clientId, clientKey),
+      PORT_RETRY_WAIT_TIMEOUT_MS,
+    );
+    if (!retryPort) {
+      const message = error instanceof Error ? error.message : 'Streaming failed';
+      return new Response(message, { status: 500 });
+    }
+
+    try {
+      return await serveViaWorker(buildMessage(), retryPort);
+    } catch (retryError) {
+      const message = retryError instanceof Error ? retryError.message : 'Streaming failed';
+      return new Response(message, { status: 500 });
+    }
   }
 }
 

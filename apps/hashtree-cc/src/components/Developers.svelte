@@ -2,7 +2,8 @@
   import { onMount } from 'svelte';
   import UseCaseCarousel from './UseCaseCarousel.svelte';
   import SectionHeading from './SectionHeading.svelte';
-  import { getMediaClientKey, setupMediaStreaming } from '../lib/mediaStreamingSetup';
+  import { buildImmutableMediaUrl } from '../lib/htreeRuntime';
+  import { ensureHashtreeStreamingReady } from '../lib/workerStreaming';
 
   const baseUrl = import.meta.env.BASE_URL;
   let copiedCmd = $state<string | null>(null);
@@ -31,8 +32,8 @@
   const privateCmd = 'htree://self/myrepo#private';
   const irisBrowserUrl = 'https://browser.iris.to/';
   const irisBrowserRepoUrl = 'https://git.iris.to/#/npub1xdhnr9mrv47kkrn95k6cwecearydeh8e895990n3acntwvmgk2dsdeeycm/iris-browser';
+  const gitDemoNhash = 'nhash1qqsqmafutt4u7g4x7cyx0w0k84gs7txg54v7sygkm3aspld3h7ehhyg9ypzx8wcsnd63spv9d3scr4zst2s48mv0yl36lj2c02a6vlms607nkqysxg5';
   const gitDemoViewerLink = '/#/nhash1qqsqmafutt4u7g4x7cyx0w0k84gs7txg54v7sygkm3aspld3h7ehhyg9ypzx8wcsnd63spv9d3scr4zst2s48mv0yl36lj2c02a6vlms607nkqysxg5/htree.mp4';
-  const gitDemoVideoBaseSrc = '/htree/nhash1qqsqmafutt4u7g4x7cyx0w0k84gs7txg54v7sygkm3aspld3h7ehhyg9ypzx8wcsnd63spv9d3scr4zst2s48mv0yl36lj2c02a6vlms607nkqysxg5/htree.mp4';
   let gitDemoVideoSrc = $state('');
 
   async function initGitDemoVideo(): Promise<void> {
@@ -40,18 +41,14 @@
       return;
     }
 
-    let streamingReady = await setupMediaStreaming().catch(() => false);
-    if (!streamingReady) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      streamingReady = await setupMediaStreaming().catch(() => false);
-    }
-
+    const streamingReady = await ensureHashtreeStreamingReady().catch(() => false);
     if (!streamingReady) {
       return;
     }
 
-    // htree_c binds /htree fetches to this tab's registered SW media port.
-    gitDemoVideoSrc = `${gitDemoVideoBaseSrc}?htree_c=${encodeURIComponent(getMediaClientKey())}`;
+    gitDemoVideoSrc = buildImmutableMediaUrl(gitDemoNhash, 'htree.mp4', {
+      mimeType: 'video/mp4',
+    });
   }
 
   onMount(() => {
