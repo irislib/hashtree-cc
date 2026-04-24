@@ -3,6 +3,7 @@ import {
   createManagedNostrMeshSession,
   createSecretKeyEventSigner,
   createSecretKeyGiftUnwrapper,
+  createSecretKeyNip44GiftWrap,
   ManagedWebRTCMeshHost,
 } from '@hashtree/worker/p2p';
 import { DEFAULT_RELAYS as DEFAULT_NOSTR_RELAYS } from '@hashtree/nostr';
@@ -235,6 +236,7 @@ async function syncSession(force = false): Promise<void> {
     relayUrls: currentRelays,
     localStore,
     signEvent: createSecretKeyEventSigner(secretKey),
+    giftWrap: createSecretKeyNip44GiftWrap(secretKey),
     unwrapGift: createSecretKeyGiftUnwrapper(secretKey),
     publishMode: 'best-effort',
     getFollows: () => new Set<string>(),
