@@ -10,6 +10,12 @@
       href: 'https://files.iris.to',
     },
     {
+      src: `${baseUrl}screenshot-iris-audio.webp`,
+      title: 'Iris Audio',
+      desc: 'Music player.',
+      href: 'https://audio.iris.to',
+    },
+    {
       src: `${baseUrl}screenshot-iris-docs.webp`,
       title: 'Iris Docs',
       desc: 'Collaborative documents with comments and real-time editing.',
