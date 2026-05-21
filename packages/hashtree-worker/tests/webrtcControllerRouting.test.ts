@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MemoryStore, sha256 } from '@hashtree/core';
 import { WebRTCController } from '../src/p2p/webrtcController.js';
-import { createResponse, encodeResponse } from '@hashtree/nostr';
+import { createResponse, encodeResponse } from '@hashtree/mesh';
 
 interface ControllerPeer {
   peerId: string;

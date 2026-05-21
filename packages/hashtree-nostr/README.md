@@ -1,6 +1,6 @@
 # @hashtree/nostr
 
-WebRTC P2P storage and Nostr ref resolver for hashtree.
+Nostr ref resolving, signed root snapshots, and event storage for hashtree.
 
 ## Install
 
@@ -8,35 +8,11 @@ WebRTC P2P storage and Nostr ref resolver for hashtree.
 npm install @hashtree/nostr
 ```
 
-## WebRTC Store
+## P2P Transport
 
-P2P data fetching via WebRTC with Nostr signaling:
-
-```typescript
-import { WebRTCStore } from '@hashtree/nostr';
-
-const store = new WebRTCStore({
-  signer,    // NIP-07 compatible
-  pubkey,
-  encrypt,   // NIP-44
-  decrypt,
-  localStore,
-  relays: ['wss://relay.example.com'],
-  requestSelectionStrategy: 'titForTat',
-  requestFairnessEnabled: true,
-  requestDispatch: {
-    initialFanout: 2,
-    hedgeFanout: 1,
-    maxFanout: 8,
-    hedgeIntervalMs: 120,
-  },
-});
-
-await store.start();
-await store.loadPeerMetadata(); // optional warm start
-const data = await store.get(hash);
-await store.persistPeerMetadata(); // optional shutdown/save step
-```
+P2P blob fetching is provided by `@hashtree/fips-transport`. FIPS owns peer
+discovery, signaling, and WebRTC/UDP links; Hashtree carries verified mesh blob
+frames over the FIPS node endpoint.
 
 ## Nostr Ref Resolver
 
@@ -75,8 +51,8 @@ npub1abc.../treename/path/to/file.ext
 import { createNostrRefResolver } from '@hashtree/nostr';
 
 const resolver = createNostrRefResolver({
-  subscribe: (filters, onEvent) => { /* NDK subscribe */ },
-  publish: (event) => { /* NDK publish */ },
+  subscribe: (filters, onEvent) => { /* your relay client subscribe callback */ },
+  publish: (event) => { /* your relay client publish callback */ },
 });
 
 const root = await resolver.resolve('npub1.../myfiles');

@@ -47,7 +47,7 @@ import {
   buildHedgedWavePlan,
   normalizeDispatchConfig,
   syncSelectorPeers,
-} from '@hashtree/nostr';
+} from '@hashtree/mesh';
 import { LRUCache } from './lruCache.js';
 import { QueryForwardingMachine } from './queryForwardingMachine.js';
 

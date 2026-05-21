@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { SignalingMessage } from '@hashtree/nostr';
+import type { SignalingMessage } from '@hashtree/mesh';
 import {
   SIGNALING_KIND,
   HELLO_TAG,

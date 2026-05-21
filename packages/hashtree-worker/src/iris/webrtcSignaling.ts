@@ -8,7 +8,7 @@
  */
 
 import type { SignedEvent } from './protocol';
-import type { SignalingMessage } from '@hashtree/nostr';
+import type { SignalingMessage } from '@hashtree/mesh';
 import type { WebRTCController } from './webrtc';
 import {
   createSignalingFilters,

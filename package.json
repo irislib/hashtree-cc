@@ -30,7 +30,7 @@
       "@hashtree/index": "link:../hashtree/ts/packages/hashtree-index",
       "@hashtree/mesh": "link:../hashtree/ts/packages/hashtree-mesh",
       "@hashtree/nostr": "link:../hashtree/ts/packages/hashtree-nostr",
-      "@hashtree/worker": "0.2.14",
+      "@hashtree/worker": "0.2.16",
       "ndk": "workspace:*",
       "ndk-cache": "workspace:*",
       "nostr-social-graph": "workspace:*"

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Store } from '@hashtree/core';
-import { createRequest, createResponse, encodeRequest, encodeResponse } from '@hashtree/nostr';
+import { createRequest, createResponse, encodeRequest, encodeResponse } from '@hashtree/mesh';
 import { WebRTCController } from '../src/p2p/webrtcController.js';
 
 interface ControllerPeer {

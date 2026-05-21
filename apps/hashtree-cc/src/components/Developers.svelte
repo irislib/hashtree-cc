@@ -114,7 +114,7 @@
       <div class="i-lucide-globe text-2xl text-[#34d399] mb-3"></div>
       <h3 class="text-text-1 font-semibold mb-2">Peer-to-Peer</h3>
       <p class="text-text-2 text-sm">
-        Share directly between browsers and devices over WebRTC.
+        Share directly between browsers and devices over FIPS-backed peer transports.
         Queries are forwarded through the network with <a href="https://www.hyphanet.org/" class="text-accent hover:underline" target="_blank" rel="noopener">Hyphanet</a>-style hops-to-live.
       </p>
     </div>
@@ -218,7 +218,7 @@
     <SectionHeading id="git-without-github">Git without GitHub</SectionHeading>
     <p class="text-lg text-text-2 max-w-xl mx-auto">
       Push and pull git repos over content-addressed storage.
-      No server required. Sync over Blossom servers, WebRTC, or any transport.
+      No server required. Sync over Blossom servers, FIPS peers, or any transport.
     </p>
   </div>
 
@@ -397,7 +397,7 @@
           </tr>
           <tr class="border-b border-surface-2">
             <td class="py-2 pr-4 font-mono text-accent whitespace-nowrap">htree start --daemon</td>
-            <td class="py-2 text-text-2">Join the P2P network over WebRTC</td>
+            <td class="py-2 text-text-2">Join the P2P network</td>
           </tr>
           <tr class="border-b border-surface-2">
             <td class="py-2 pr-4 font-mono text-accent whitespace-nowrap">htree status</td>
@@ -466,11 +466,11 @@
       </p>
       <p>
         <code class="text-accent">@hashtree/worker/p2p</code>:
-        WebRTC controller/proxy and signaling helpers for browser-to-browser block transfer.
+        Browser peer controller/proxy helpers for block transfer.
       </p>
       <p>
         <code class="text-accent">@hashtree/nostr</code>:
-        Nostr signaling message types used by the WebRTC sync path.
+        Nostr root resolution and signed tree snapshot helpers.
       </p>
     </div>
   </div>
@@ -494,7 +494,7 @@
         <ol class="text-text-3 text-xs space-y-1 pl-4 list-decimal">
           <li>Check local IndexedDB cache.</li>
           <li>If missing, fetch from Blossom read servers.</li>
-          <li>If still missing, ask connected WebRTC peers.</li>
+          <li>If still missing, ask connected peer transports.</li>
         </ol>
         <p class="text-text-3 text-xs mt-2">
           This order is applied per needed block, and remote hits are cached back to IndexedDB.
@@ -515,20 +515,19 @@
   <div class="bg-surface-1 rounded-xl p-6 mb-8">
     <h3 class="text-lg font-semibold text-text-1 mb-3">
       <span class="i-lucide-radio mr-2"></span>
-      WebRTC Signaling (NIP-100)
+      Peer Transport
     </h3>
     <p class="text-text-2 text-sm mb-2">
-      Peer-to-peer connections are established via Nostr ephemeral events (kind 25050).
-      Peers broadcast presence with <code class="text-accent">#l: "hello"</code> tags for discovery, then exchange WebRTC offers and answers encrypted with NIP-44.
+      Hashtree blob reads use verified mesh request/response frames. Browser peers can still use WebRTC data channels, while native nodes use FIPS-owned endpoint bytes.
     </p>
     <p class="text-text-3 text-xs">
-      Spec:
+      Mesh protocol:
       <a
-        href="https://github.com/nostr-protocol/nips/pull/363"
+        href="https://git.iris.to/#/npub1xdhnr9mrv47kkrn95k6cwecearydeh8e895990n3acntwvmgk2dsdeeycm/hashtree/docs/hashtree-on-fips.md"
         class="text-accent hover:underline"
         target="_blank"
         rel="noopener"
-      >NIP-100</a>
+      >Hashtree on FIPS</a>
     </p>
   </div>
 

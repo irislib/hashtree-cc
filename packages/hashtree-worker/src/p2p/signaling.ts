@@ -1,4 +1,4 @@
-import type { SignalingMessage } from '@hashtree/nostr';
+import type { SignalingMessage } from '@hashtree/mesh';
 
 type DirectedSignalingMessage = Exclude<SignalingMessage, { type: 'hello' }>;
 
