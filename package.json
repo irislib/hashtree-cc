@@ -30,10 +30,13 @@
       "@hashtree/index": "link:../hashtree/ts/packages/hashtree-index",
       "@hashtree/mesh": "link:../hashtree/ts/packages/hashtree-mesh",
       "@hashtree/nostr": "link:../hashtree/ts/packages/hashtree-nostr",
-      "@hashtree/worker": "0.2.16",
+      "@hashtree/worker": "link:../hashtree/ts/packages/hashtree-worker",
       "ndk": "workspace:*",
       "ndk-cache": "workspace:*",
-      "nostr-social-graph": "workspace:*"
+      "nostr-social-graph": "workspace:*",
+      "@hashtree/fips-transport": "link:../hashtree/ts/packages/hashtree-fips-transport",
+      "@hashtree/git": "link:../hashtree/ts/packages/hashtree-git",
+      "@hashtree/merge": "link:../hashtree/ts/packages/hashtree-merge"
     },
     "onlyBuiltDependencies": [
       "esbuild"
