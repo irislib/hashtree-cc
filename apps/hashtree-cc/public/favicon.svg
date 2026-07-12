@@ -1,4 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#916dfe"/>
-  <text x="16" y="23" font-size="22" font-family="monospace" font-weight="bold" fill="white" text-anchor="middle">#</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="hashtree.cc">
+  <rect width="64" height="64" rx="16" fill="#050507"/>
+  <defs>
+    <linearGradient id="hash" x1="18" y1="16" x2="46" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#a779ff"/>
+      <stop offset="1" stop-color="#6f3dff"/>
+    </linearGradient>
+  </defs>
+  <g fill="url(#hash)">
+    <rect x="22" y="16" width="6" height="32" rx="3"/>
+    <rect x="36" y="16" width="6" height="32" rx="3"/>
+    <rect x="16" y="23" width="32" height="6" rx="3"/>
+    <rect x="16" y="35" width="32" height="6" rx="3"/>
+  </g>
 </svg>

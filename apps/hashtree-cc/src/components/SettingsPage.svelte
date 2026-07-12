@@ -151,9 +151,9 @@
 <section class="py-8 space-y-6 max-w-3xl mx-auto w-full" data-testid="settings-page">
   <div class="bg-surface-1 rounded-xl p-5 space-y-3">
     <div class="flex items-center justify-between">
-      <h2 class="text-text-1 text-lg font-semibold">Peers ({connectedPeers.length})</h2>
+      <h2 class="text-text-1 text-lg font-semibold">FIPS peers ({connectedPeers.length})</h2>
     </div>
-    <p class="text-text-3 text-sm">Currently connected WebRTC peers discovered via Nostr signaling relays</p>
+    <p class="text-text-3 text-sm">Device peers discovered over Nostr and connected through authenticated FIPS WebRTC.</p>
 
     {#if p2p.pubkey}
       {@const myPeerName = peerAnimalName(p2p.pubkey)}
@@ -162,7 +162,7 @@
           <img src={identiconUri(p2p.pubkey)} alt="" width="24" height="24" />
         </div>
         <div class="min-w-0 flex-1">
-          <div class="text-text-3 text-xs">Your peer identity</div>
+          <div class="text-text-3 text-xs">Your FIPS device identity</div>
           <div class="text-text-1 text-sm font-medium truncate">{myPeerName}</div>
         </div>
       </div>
@@ -192,16 +192,7 @@
               </div>
               <div class="text-text-1 text-sm font-medium truncate">{peerAnimalName(peer.pubkey)}</div>
             </div>
-            <div class="text-xs text-text-3 text-right">
-              <div>↑ {formatBytes(peer.bytesSent)}</div>
-              <div>↓ {formatBytes(peer.bytesReceived)}</div>
-            </div>
-            <div class="text-[11px] text-text-3 text-right font-mono">
-              <div>q ↑{peer.requestsSent} ↓{peer.requestsReceived}</div>
-              <div>r ↑{peer.responsesSent} ↓{peer.responsesReceived}</div>
-              <div>fwd {peer.forwardedRequests} ok {peer.forwardedResolved}</div>
-              <div>dup-supp {peer.forwardedSuppressed}</div>
-            </div>
+            <div class="text-[11px] text-text-3 text-right font-mono">FIPS WebRTC</div>
           </div>
         {/each}
       </div>
@@ -210,13 +201,13 @@
 
   <div class="bg-surface-1 rounded-xl p-5 space-y-3">
     <div class="flex items-center justify-between">
-      <h2 class="text-text-1 text-lg font-semibold">P2P Relays</h2>
+      <h2 class="text-text-1 text-lg font-semibold">FIPS discovery relays</h2>
     </div>
     <p class="text-text-3 text-sm">
       {#if embeddedDaemonRelayUrl}
         Connected through the embedded Iris daemon relay, with configured upstream relays kept alongside it.
       {:else}
-        Nostr relays used to find and connect to WebRTC peers.
+        Nostr relays used to discover FIPS device peers and exchange WebRTC signaling.
       {/if}
     </p>
 
@@ -285,7 +276,7 @@
       <button class="btn-ghost text-xs" onclick={() => settingsStore.reset()}>Reset All</button>
     </div>
     <p class="text-text-3 text-sm">
-      HTTP fallback servers used when content is unavailable from WebRTC peers.
+      HTTP fallback servers used when content is unavailable from FIPS peers.
       <a
         href="https://github.com/hzrd149/blossom"
         target="_blank"

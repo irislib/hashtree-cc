@@ -25,9 +25,21 @@ importers:
 
   apps/hashtree-cc:
     dependencies:
+      '@fips/browser':
+        specifier: link:../../../fips-ts/packages/browser
+        version: link:../../../fips-ts/packages/browser
+      '@fips/core':
+        specifier: link:../../../fips-ts/packages/core
+        version: link:../../../fips-ts/packages/core
+      '@fips/transport-webrtc':
+        specifier: link:../../../fips-ts/packages/transport-webrtc
+        version: link:../../../fips-ts/packages/transport-webrtc
       '@hashtree/core':
         specifier: link:../../../hashtree/ts/packages/hashtree
         version: link:../../../hashtree/ts/packages/hashtree
+      '@hashtree/fips-transport':
+        specifier: link:../../../hashtree/ts/packages/hashtree-fips-transport
+        version: link:../../../hashtree/ts/packages/hashtree-fips-transport
       '@hashtree/nostr':
         specifier: link:../../../hashtree/ts/packages/hashtree-nostr
         version: link:../../../hashtree/ts/packages/hashtree-nostr

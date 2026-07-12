@@ -8,12 +8,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const appDir = path.resolve(__dirname, '..');
 const defaultWorkerCompatibilityDate = '2026-03-19';
+const wranglerVersion = '4';
 
 export const releaseProfile = {
   appName: 'hashtree.cc',
   distDir: 'dist',
   treeName: 'hashtree-cc-site',
   defaultWorkerName: 'hashtree-cc',
+  defaultRoutes: ['hashtree.cc/*'],
+  workerScript: 'scripts/https-static-assets-worker.mjs',
   workerNameEnv: 'CF_WORKER_NAME_HASHTREE_CC',
   pagesProjectEnv: 'CF_PAGES_PROJECT_HASHTREE_CC',
   buildCommand: ['pnpm', 'run', 'build'],
@@ -23,12 +26,49 @@ export const releaseProfile = {
   ],
 };
 
+function cloneValues(values) {
+  return values ? [...values] : [];
+}
+
+function usesBuiltInWorker(workerName) {
+  return Boolean(releaseProfile.defaultWorkerName && workerName === releaseProfile.defaultWorkerName);
+}
+
 function wranglerPagesCommand(...args) {
-  return ['npx', 'wrangler@4', ...args];
+  return ['npx', `wrangler@${wranglerVersion}`, ...args];
 }
 
 function wranglerWorkerAssetsCommand(...args) {
-  return ['npx', 'wrangler@4', 'deploy', ...args];
+  return ['npx', `wrangler@${wranglerVersion}`, 'deploy', ...args];
+}
+
+function workerAssetsDeployCommand(options) {
+  if (releaseProfile.workerScript) {
+    return [
+      'node',
+      './scripts/deploy-worker-assets.mjs',
+      '--script',
+      releaseProfile.workerScript,
+      '--assets',
+      releaseProfile.distDir,
+      '--name',
+      options.workerName,
+      '--compatibility-date',
+      options.workerCompatibilityDate,
+      '--wrangler-version',
+      wranglerVersion,
+    ];
+  }
+
+  return wranglerWorkerAssetsCommand(
+    '--assets',
+    releaseProfile.distDir,
+    '--name',
+    options.workerName,
+    '--compatibility-date',
+    options.workerCompatibilityDate,
+    '--keep-vars',
+  );
 }
 
 export function parseArgs(argv, env = process.env) {
@@ -102,18 +142,26 @@ export function parseArgs(argv, env = process.env) {
     throw new Error('--pages-only is not compatible with --route/--domain');
   }
 
+  const resolvedWorkerName = pagesOnly
+    ? undefined
+    : workerName ?? env[releaseProfile.workerNameEnv] ?? releaseProfile.defaultWorkerName;
+  const defaultRoutes = usesBuiltInWorker(resolvedWorkerName)
+    ? cloneValues(releaseProfile.defaultRoutes)
+    : [];
+  const defaultDomains = usesBuiltInWorker(resolvedWorkerName)
+    ? cloneValues(releaseProfile.defaultDomains)
+    : [];
+
   return {
     dryRun,
     skipCloudflare,
     pagesOnly,
     branch,
     treeName: treeName ?? releaseProfile.treeName,
-    workerName: pagesOnly
-      ? undefined
-      : workerName ?? env[releaseProfile.workerNameEnv] ?? releaseProfile.defaultWorkerName,
+    workerName: resolvedWorkerName,
     pagesProject: pagesProject ?? env[releaseProfile.pagesProjectEnv],
-    routes,
-    domains,
+    routes: routes.length > 0 ? routes : defaultRoutes,
+    domains: domains.length > 0 ? domains : defaultDomains,
     workerCompatibilityDate:
       workerCompatibilityDate ?? env.CF_WORKER_COMPATIBILITY_DATE ?? defaultWorkerCompatibilityDate,
   };
@@ -153,15 +201,7 @@ export function createReleasePlan(options) {
 
   if (!options.skipCloudflare) {
     const deployCommand = options.workerName
-      ? wranglerWorkerAssetsCommand(
-          '--assets',
-          releaseProfile.distDir,
-          '--name',
-          options.workerName,
-          '--compatibility-date',
-          options.workerCompatibilityDate,
-          '--keep-vars',
-        )
+      ? workerAssetsDeployCommand(options)
       : wranglerPagesCommand(
           'pages',
           'deploy',

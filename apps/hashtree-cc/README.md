@@ -2,7 +2,7 @@
 
 Landing page and file sharing app at [hashtree.cc](https://hashtree.cc).
 
-Upload files, get a content-addressed `nhash` link. Recipients fetch data P2P via WebRTC or from Blossom servers — no accounts, no server-side storage.
+Upload files, get a content-addressed `nhash` link. Recipients fetch data over Nostr-discovered FIPS WebRTC or from Blossom servers — no accounts, no server-side storage.
 
 ## Development
 

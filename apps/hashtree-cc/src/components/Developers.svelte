@@ -465,8 +465,8 @@
         worker API for IndexedDB persistence, Blossom transport, connectivity stats, and service-worker media streaming.
       </p>
       <p>
-        <code class="text-accent">@hashtree/worker/p2p</code>:
-        Browser peer controller/proxy helpers for block transfer.
+        <code class="text-accent">@hashtree/fips-transport</code>:
+        Verified Hashtree block transfer over authenticated FIPS endpoints.
       </p>
       <p>
         <code class="text-accent">@hashtree/nostr</code>:
@@ -518,7 +518,7 @@
       Peer Transport
     </h3>
     <p class="text-text-2 text-sm mb-2">
-      Hashtree blob reads use verified mesh request/response frames. Browser peers can still use WebRTC data channels, while native nodes use FIPS-owned endpoint bytes.
+      Hashtree blob reads use verified request/response frames over FIPS. Browser links use Nostr-discovered WebRTC while native nodes can use any configured FIPS transport.
     </p>
     <p class="text-text-3 text-xs">
       Mesh protocol:

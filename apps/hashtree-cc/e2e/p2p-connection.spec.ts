@@ -45,7 +45,7 @@ async function getPeerCount(page: Page): Promise<number> {
   });
 }
 
-test('two isolated sessions connect to each other over p2p', async ({ browser, renderLoopFailures }) => {
+test('two isolated sessions discover and connect over FIPS WebRTC', async ({ browser, renderLoopFailures }) => {
   const relayNamespace = `p2p-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const relayUrl = `ws://localhost:${relayPort}/${relayNamespace}`;
 
@@ -90,7 +90,20 @@ test('two isolated sessions connect to each other over p2p', async ({ browser, r
   }
 });
 
-test('viewer fetch falls back to WebRTC when blossom read servers are disabled', async ({ browser, renderLoopFailures }) => {
+test('keeps its FIPS device identity across reloads', async ({ page }) => {
+  await page.goto('/');
+  await expect.poll(async () => page.evaluate(() => (
+    window.__hashtreeCcP2P?.pubkey ?? ''
+  )), { timeout: 30_000 }).not.toBe('');
+
+  const beforeReload = await page.evaluate(() => window.__hashtreeCcP2P?.pubkey ?? '');
+  await page.reload();
+  await expect.poll(async () => page.evaluate(() => (
+    window.__hashtreeCcP2P?.pubkey ?? ''
+  )), { timeout: 30_000 }).toBe(beforeReload);
+});
+
+test('viewer fetch falls back to FIPS when blossom read servers are disabled', async ({ browser, renderLoopFailures }) => {
   const relayNamespace = `p2p-fallback-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const relayUrl = `ws://localhost:${relayPort}/${relayNamespace}`;
 

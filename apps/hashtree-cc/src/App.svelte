@@ -12,6 +12,8 @@
   import Footer from './components/Footer.svelte';
   import { settingsStore } from './lib/settings';
 
+  const baseUrl = import.meta.env.BASE_URL;
+
   let route = $state<
     { type: 'share' }
     | { type: 'dev'; section?: string }
@@ -59,8 +61,9 @@
 <div class="min-h-full flex flex-col">
   <header class="px-4 py-3 flex flex-col items-center gap-2 max-w-5xl mx-auto w-full">
     <div class="flex items-center justify-between w-full">
-      <a href="/" class="flex items-center gap-2 no-underline" onclick={navigate}>
-        <span class="text-xl font-bold text-accent font-mono"># hashtree</span>
+      <a href="/" class="inline-flex items-center gap-2 no-underline" onclick={navigate}>
+        <img src={`${baseUrl}favicon.svg`} alt="" class="w-8 h-8 shrink-0" draggable="false" />
+        <span class="text-xl font-bold leading-none text-text-1">Quick Share</span>
       </a>
       <div class="flex items-center gap-2">
         {#if showBandwidthIndicator}

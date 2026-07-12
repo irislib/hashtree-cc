@@ -2,13 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createReleasePlan, parseArgs, parsePublishOutput, runRelease } from '../scripts/release-site.mjs';
+import {
+  configFor as workerAssetsConfigFor,
+  parseArgs as parseWorkerAssetsArgs,
+} from '../scripts/deploy-worker-assets.mjs';
 
 test('uses the built-in Worker default for hashtree.cc', () => {
   const parsed = parseArgs([]);
 
   assert.equal(parsed.workerName, 'hashtree-cc');
   assert.equal(parsed.treeName, 'hashtree-cc-site');
-  assert.deepEqual(parsed.routes, []);
+  assert.deepEqual(parsed.routes, ['hashtree.cc/*']);
   assert.deepEqual(parsed.domains, []);
 });
 
@@ -25,7 +29,7 @@ test('builds a Worker release plan in build-test-publish-deploy order', () => {
   const plan = createReleasePlan({
     workerName: 'hashtree-cc',
     treeName: 'hashtree-cc-site',
-    routes: [],
+    routes: ['hashtree.cc/*'],
     domains: [],
     skipCloudflare: false,
     workerCompatibilityDate: '2026-03-19',
@@ -36,16 +40,20 @@ test('builds a Worker release plan in build-test-publish-deploy order', () => {
     ['build', 'test-1', 'test-2', 'publish', 'deploy'],
   );
   assert.deepEqual(plan.steps.at(-1)?.command, [
-    'npx',
-    'wrangler@4',
-    'deploy',
+    'node',
+    './scripts/deploy-worker-assets.mjs',
+    '--script',
+    'scripts/https-static-assets-worker.mjs',
     '--assets',
     'dist',
     '--name',
     'hashtree-cc',
     '--compatibility-date',
     '2026-03-19',
-    '--keep-vars',
+    '--wrangler-version',
+    '4',
+    '--route',
+    'hashtree.cc/*',
   ]);
 });
 
@@ -60,21 +68,47 @@ test('adds explicit routes and domains to the Worker deploy command', () => {
   });
 
   assert.deepEqual(plan.steps.at(-1)?.command, [
-    'npx',
-    'wrangler@4',
-    'deploy',
+    'node',
+    './scripts/deploy-worker-assets.mjs',
+    '--script',
+    'scripts/https-static-assets-worker.mjs',
     '--assets',
     'dist',
     '--name',
     'hashtree-cc',
     '--compatibility-date',
     '2026-03-19',
-    '--keep-vars',
+    '--wrangler-version',
+    '4',
     '--route',
     'hashtree.cc/*',
     '--domain',
     'hashtree.cc',
   ]);
+});
+
+test('generates a Worker Static Assets config that runs the redirect Worker first', () => {
+  const options = parseWorkerAssetsArgs([
+    '--script',
+    'scripts/https-static-assets-worker.mjs',
+    '--assets',
+    'dist',
+    '--name',
+    'hashtree-cc',
+    '--compatibility-date',
+    '2026-03-19',
+  ]);
+
+  assert.deepEqual(workerAssetsConfigFor(options), {
+    name: 'hashtree-cc',
+    compatibility_date: '2026-03-19',
+    main: 'scripts/https-static-assets-worker.mjs',
+    assets: {
+      directory: 'dist',
+      binding: 'ASSETS',
+      run_worker_first: true,
+    },
+  });
 });
 
 test('runs hashtree publish and Worker deploy in parallel after tests', async () => {

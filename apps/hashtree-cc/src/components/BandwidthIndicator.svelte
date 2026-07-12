@@ -7,10 +7,10 @@
 
   $effect(() => {
     const now = Date.now();
-    const webrtcSent = p2p.peers.reduce((sum, peer) => sum + peer.bytesSent, 0);
-    const webrtcReceived = p2p.peers.reduce((sum, peer) => sum + peer.bytesReceived, 0);
-    const totalSent = webrtcSent + p2p.blossomBandwidth.totalBytesSent;
-    const totalReceived = webrtcReceived + p2p.blossomBandwidth.totalBytesReceived;
+    const fipsSent = p2p.peers.reduce((sum, peer) => sum + peer.bytesSent, 0);
+    const fipsReceived = p2p.peers.reduce((sum, peer) => sum + peer.bytesReceived, 0);
+    const totalSent = fipsSent + p2p.blossomBandwidth.totalBytesSent;
+    const totalReceived = fipsReceived + p2p.blossomBandwidth.totalBytesReceived;
 
     if (previous) {
       const elapsed = (now - previous.at) / 1000;
