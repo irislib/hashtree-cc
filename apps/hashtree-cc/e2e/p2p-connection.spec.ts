@@ -68,6 +68,11 @@ test('two isolated sessions discover and connect over FIPS WebRTC', async ({ bro
       return state?.started ?? false;
     })).toBe(true);
 
+    await expect.poll(async () => Promise.all([
+      pageA.evaluate(() => window.__hashtreeCcP2P?.discoveryScope ?? ''),
+      pageB.evaluate(() => window.__hashtreeCcP2P?.discoveryScope ?? ''),
+    ])).toEqual(['fips-overlay-v1', 'fips-overlay-v1']);
+
     await expect.poll(async () => {
       const [peerCountA, peerCountB] = await Promise.all([
         getPeerCount(pageA),
