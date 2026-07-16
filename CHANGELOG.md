@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.4 - 2026-07-16
+
+- Pin the shared Hashtree worker 0.3.3 and its immutable runtime 0.4.4
+  release, preserving exact-provider HTL 10 media reads after restart.
+- Keep Quick Share thin: provider-less viewers remain Blossom-only and never
+  infer blob providers from arbitrary connected peers.
+- Remove redundant service-worker cleanup from isolated browser tests so the
+  real two-session FIPS gate waits for activation instead of racing it.
+
 ## 0.1.3 - 2026-07-16
 
 - Consume immutable FIPS, Hashtree, Iris Kit, and social-graph releases instead

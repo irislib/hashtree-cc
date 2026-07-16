@@ -9,8 +9,8 @@ const fipsRoot = 'https://github.com/mmalmi/fips-ts/releases/download/runtime-v0
 const tcpRoot = 'https://github.com/mmalmi/fips-tcp/releases/download/v0.2.0';
 const hashtreeRoot =
   'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.4.2';
-const hashtreeRuntime043 =
-  'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.4.3';
+const hashtreeRuntime044 =
+  'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.4.4';
 const kitRoot = 'https://github.com/mmalmi/iris-kit/releases/download/runtime-v0.2.2';
 
 const releases = {
@@ -43,7 +43,7 @@ const releases = {
     integrity: 'sha512-9wI7r3Fwx0ATBt42IUVE+AIqSdGbevS1iesSqbwz0gDia/yxJYH6cMXNvnPV6BClwdewJBUVy+r12ZfqXkyI1A==',
   },
   '@hashtree/fips-transport': {
-    url: `${hashtreeRuntime043}/hashtree-fips-transport-0.4.3.tgz`,
+    url: `${hashtreeRuntime044}/hashtree-fips-transport-0.4.3.tgz`,
     integrity: 'sha512-HZZ1CEimNUXoBm75Jk2weKT6FF2Rgja9NO8dQQtCzHHMhJ4ZRODRzOR9zqOsTw5eY2q6rDm4FEdikKltEZ7ctg==',
   },
   '@hashtree/index': {
@@ -59,8 +59,8 @@ const releases = {
     integrity: 'sha512-WbfVz9EXOeRm+GnkxSa1fveZiMA4AySs0ly2JB7wxd78FbbGl7YpL/7Bvh0DKRxVi7ZY41kjHWaDrSSSQ2pa8A==',
   },
   '@hashtree/worker': {
-    url: `${hashtreeRuntime043}/hashtree-worker-0.3.2.tgz`,
-    integrity: 'sha512-qKh9A1xlXbxFwZss+XVvIzYGR95A9+xwZYKHu2Xl/obOiR5pIIz5iHpjB/KUTpc/H1uSeIyJplFKmfpLDAMZ3w==',
+    url: `${hashtreeRuntime044}/hashtree-worker-0.3.3.tgz`,
+    integrity: 'sha512-NXRM1ezuYT7p6ISdHdDYGGEZtAZGpHNyTBWaxvRe5D1UnrAhggqBluSwr4HEpsAgh54LAnSMLqgzwbGVDici4A==',
   },
   ndk: {
     url: `${kitRoot}/ndk-0.2.1.tgz`,
