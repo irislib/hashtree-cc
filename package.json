@@ -11,7 +11,6 @@
   "packageManager": "pnpm@10.23.0",
   "scripts": {
     "dev": "pnpm --filter hashtree-cc dev",
-    "build:deps": "pnpm --filter hashtree-cc build:deps",
     "build": "pnpm --filter hashtree-cc build",
     "preview": "pnpm --filter hashtree-cc preview",
     "test": "pnpm --filter hashtree-cc test:release && pnpm --filter hashtree-cc test",
@@ -20,26 +19,23 @@
     "test:portable": "pnpm --filter hashtree-cc test:portable",
     "smoke:portable": "pnpm --filter hashtree-cc smoke:portable",
     "publish:portable": "pnpm --filter hashtree-cc publish:portable",
-    "release:site": "pnpm --filter hashtree-cc release:site"
+    "release:site": "pnpm --filter hashtree-cc release:site",
+    "verify:dependency-lock": "node ./scripts/verify-dependency-lock.mjs"
   },
   "pnpm": {
-    "overrides": {
-      "@hashtree/collection": "link:../hashtree/ts/packages/hashtree-collection",
-      "@hashtree/core": "link:../hashtree/ts/packages/hashtree",
-      "@hashtree/dexie": "link:../hashtree/ts/packages/hashtree-dexie",
-      "@hashtree/index": "link:../hashtree/ts/packages/hashtree-index",
-      "@hashtree/mesh": "link:../hashtree/ts/packages/hashtree-mesh",
-      "@hashtree/nostr": "link:../hashtree/ts/packages/hashtree-nostr",
-      "@hashtree/worker": "link:../hashtree/ts/packages/hashtree-worker",
-      "ndk": "workspace:*",
-      "ndk-cache": "workspace:*",
-      "nostr-social-graph": "workspace:*",
-      "@hashtree/fips-transport": "link:../hashtree/ts/packages/hashtree-fips-transport",
-      "@hashtree/git": "link:../hashtree/ts/packages/hashtree-git",
-      "@hashtree/merge": "link:../hashtree/ts/packages/hashtree-merge"
-    },
     "onlyBuiltDependencies": [
       "esbuild"
-    ]
+    ],
+    "overrides": {
+      "@babel/core": "7.29.6",
+      "@babel/plugin-transform-modules-systemjs": "7.29.4",
+      "@rollup/plugin-terser>serialize-javascript": "7.0.5",
+      "brace-expansion@5.0.5": "5.0.6",
+      "defu": "6.1.5",
+      "devalue": "5.8.1",
+      "fast-uri": "3.1.2",
+      "postcss": "8.5.10",
+      "tsx>esbuild": "0.28.1"
+    }
   }
 }

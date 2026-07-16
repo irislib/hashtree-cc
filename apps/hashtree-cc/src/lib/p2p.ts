@@ -24,8 +24,9 @@ import { getEffectiveRelayUrls } from './irisRuntimeNetwork';
 
 const STATS_INTERVAL_MS = 1_000;
 const REQUEST_TIMEOUT_MS = 8_000;
-const REQUEST_RETRY_INTERVAL_MS = 750;
-const REQUEST_MAX_ATTEMPTS = 4;
+const PROVIDER_CONNECT_TIMEOUT_MS = 30_000;
+const REMOTE_BLOB_HTL = 10;
+export const SHARE_PROVIDER_QUERY = 'provider';
 
 const DEFAULT_RELAYS = DEFAULT_NOSTR_RELAYS.filter((relay) =>
   relay === 'wss://relay.primal.net'
@@ -78,7 +79,9 @@ export interface P2PState {
   connectedRelayCount: number;
   pubkey: string | null;
   npub: string | null;
+  peerId: string | null;
   discoveryScope: string;
+  blobRoutes: Array<{ peerId: string; htl: number }>;
   peers: P2PPeerState[];
   relays: P2PRelayState[];
   blossomBandwidth: BlossomBandwidthState;
@@ -98,7 +101,9 @@ const DEFAULT_STATE: P2PState = {
   connectedRelayCount: 0,
   pubkey: null,
   npub: null,
+  peerId: null,
   discoveryScope: DEFAULT_FIPS_DISCOVERY_APP,
+  blobRoutes: [],
   peers: [],
   relays: [],
   blossomBandwidth: DEFAULT_BLOSSOM_BANDWIDTH,
@@ -118,8 +123,8 @@ let initPromise: Promise<void> | null = null;
 let settingsUnsubscribe: (() => void) | null = null;
 let blossomBandwidthUnsubscribe: (() => void) | null = null;
 let statsTimer: ReturnType<typeof setInterval> | null = null;
-let localStoreReadDepth = 0;
 let currentBlossomBandwidth: BlossomBandwidthState = DEFAULT_BLOSSOM_BANDWIDTH;
+let activeBlobRoutes: Array<{ peerId: string; htl: number }> = [];
 const peerStats = new Map<string, P2PPeerState>();
 let providerUnsubscribes: Array<() => void> = [];
 
@@ -176,6 +181,7 @@ function updateDebugState(): void {
     status: active ? 'connected' as const : 'connecting' as const,
   }));
   const xOnlyPubkey = identity ? toHex(identity.xOnlyPubkey) : null;
+  const localPeerId = identity ? toHex(identity.publicKey) : null;
   const state: P2PState = {
     started: active,
     peerCount: peers.filter((peer) => peer.connected).length,
@@ -183,7 +189,9 @@ function updateDebugState(): void {
     connectedRelayCount: active ? relays.length : 0,
     pubkey: xOnlyPubkey,
     npub: xOnlyPubkey ? npubFromHex(xOnlyPubkey) : null,
+    peerId: localPeerId,
     discoveryScope: DEFAULT_FIPS_DISCOVERY_APP,
+    blobRoutes: activeBlobRoutes.map((route) => ({ ...route })),
     peers,
     relays,
     blossomBandwidth: {
@@ -210,25 +218,27 @@ function setupBlossomBandwidthSync(): void {
   });
 }
 
-async function withLocalStoreReadGuard<T>(read: () => Promise<T>): Promise<T> {
-  localStoreReadDepth += 1;
-  try {
-    return await read();
-  } finally {
-    localStoreReadDepth -= 1;
-  }
-}
-
 function createLocalStoreAdapter(): Store {
   return {
     put: async (hash, data) => {
       const stored = await putBlob(data, 'application/octet-stream', false);
       return stored.hashHex === toHex(hash);
     },
-    get: async (hash) => withLocalStoreReadGuard(async () => getBlobForPeer(toHex(hash))),
-    has: async (hash) => withLocalStoreReadGuard(async () => !!await getBlobForPeer(toHex(hash))),
+    get: async (hash) => getBlobForPeer(toHex(hash)),
+    has: async (hash) => !!await getBlobForPeer(toHex(hash)),
     delete: async () => false,
   };
+}
+
+export function getExplicitProviderRoutes(
+  search = typeof window === 'undefined' ? '' : window.location.search,
+): readonly { peerId: string; htl: number }[] {
+  const peerId = new URLSearchParams(search).get(SHARE_PROVIDER_QUERY)?.trim().toLowerCase();
+  if (!peerId) return [];
+  if (!/^(02|03)[0-9a-f]{64}$/.test(peerId)) {
+    throw new Error('Shared Hashtree provider identity is invalid');
+  }
+  return [{ peerId, htl: REMOTE_BLOB_HTL }];
 }
 
 function getDeviceIdentity(): Promise<FipsIdentity> {
@@ -241,6 +251,7 @@ async function stopProvider(): Promise<void> {
   for (const unsubscribe of providerUnsubscribes.splice(0)) unsubscribe();
   const active = provider;
   provider = null;
+  activeBlobRoutes = [];
   peerStats.clear();
   await active?.stop().catch(() => undefined);
 }
@@ -273,26 +284,27 @@ function syncFipsSession(relays: string[]): Promise<void> {
     updateDebugState();
     try {
       identity = await getDeviceIdentity();
+      const providerRoutes = getExplicitProviderRoutes();
       const next = await createBrowserHashtreeFipsProvider({
         identity,
         relays: currentRelays,
         localStore: createLocalStoreAdapter(),
         discoveryApp: DEFAULT_FIPS_DISCOVERY_APP,
+        providerRoutes,
         forwarding: true,
         requestTimeoutMs: REQUEST_TIMEOUT_MS,
-        requestRetryIntervalMs: REQUEST_RETRY_INTERVAL_MS,
-        requestMaxAttempts: REQUEST_MAX_ATTEMPTS,
       });
       if (version !== syncVersion) {
         await next.stop();
         return;
       }
       provider = next;
+      activeBlobRoutes = providerRoutes.map((route) => ({ ...route }));
       providerUnsubscribes = [
         next.node.on('peer', (event) => handlePeerEvent(event as PeerEvent)),
         next.node.on('session', (event) => handleSessionEvent(event as SessionEvent)),
       ];
-      setP2PProvider(next);
+      setP2PProvider(providerRoutes.length > 0 ? next : null);
       activeRelaysKey = relaysKey;
       updateDebugState();
     } catch (error) {
@@ -323,8 +335,37 @@ export async function initP2P(): Promise<void> {
   return initPromise;
 }
 
-export async function getFromP2P(hashHex: string): Promise<Uint8Array | null> {
+export async function getLocalProviderPeerId(): Promise<string> {
+  identity ??= await getDeviceIdentity();
+  return toHex(identity.publicKey);
+}
+
+export async function waitForExplicitProviderRoute(): Promise<void> {
   await initP2P();
-  if (localStoreReadDepth > 0) return null;
-  return provider?.fetch(hashHex) ?? null;
+  const route = activeBlobRoutes[0];
+  if (!route || (peerStats.get(route.peerId)?.sessionsEstablished ?? 0) > 0) return;
+  const active = provider;
+  if (!active) throw new Error('Shared Hashtree provider is unavailable');
+
+  await new Promise<void>((resolve, reject) => {
+    let settled = false;
+    let unsubscribe = () => {};
+    const finish = (error?: Error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      unsubscribe();
+      if (error) reject(error);
+      else resolve();
+    };
+    const timeout = setTimeout(() => {
+      finish(new Error('Shared Hashtree provider did not connect'));
+    }, PROVIDER_CONNECT_TIMEOUT_MS);
+    unsubscribe = active.node.on('session', (event) => {
+      const session = event as SessionEvent;
+      if (session.remotePubkey === route.peerId && session.state === 'established') finish();
+    });
+    if (settled) unsubscribe();
+    else if ((peerStats.get(route.peerId)?.sessionsEstablished ?? 0) > 0) finish();
+  });
 }

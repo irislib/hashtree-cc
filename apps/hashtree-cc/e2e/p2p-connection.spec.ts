@@ -61,12 +61,12 @@ test('two isolated sessions discover and connect over FIPS WebRTC', async ({ bro
     await expect.poll(async () => pageA.evaluate(() => {
       const state = (window as unknown as { __hashtreeCcP2P?: { started?: boolean } }).__hashtreeCcP2P;
       return state?.started ?? false;
-    })).toBe(true);
+    }), { timeout: 30_000 }).toBe(true);
 
     await expect.poll(async () => pageB.evaluate(() => {
       const state = (window as unknown as { __hashtreeCcP2P?: { started?: boolean } }).__hashtreeCcP2P;
       return state?.started ?? false;
-    })).toBe(true);
+    }), { timeout: 30_000 }).toBe(true);
 
     await expect.poll(async () => Promise.all([
       pageA.evaluate(() => window.__hashtreeCcP2P?.discoveryScope ?? ''),
@@ -108,8 +108,9 @@ test('keeps its FIPS device identity across reloads', async ({ page }) => {
   )), { timeout: 30_000 }).toBe(beforeReload);
 });
 
-test('viewer fetch falls back to FIPS when blossom read servers are disabled', async ({ browser, renderLoopFailures }) => {
-  const relayNamespace = `p2p-fallback-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+test('viewer fetch uses the explicitly shared FIPS provider when blossom read servers are disabled', async ({ browser, renderLoopFailures }) => {
+  test.setTimeout(120_000);
+  const relayNamespace = `p2p-provider-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const relayUrl = `ws://localhost:${relayPort}/${relayNamespace}`;
 
   const contextA = await newContextWithRelay(browser, renderLoopFailures, relayUrl, []);
@@ -126,9 +127,9 @@ test('viewer fetch falls back to FIPS when blossom read servers are disabled', a
         getPeerCount(pageB),
       ]);
       return peerCountA > 0 && peerCountB > 0;
-    }, { timeout: 30000 }).toBe(true);
+    }, { timeout: 60_000 }).toBe(true);
 
-    const content = `p2p-fallback-${Date.now()}`;
+    const content = `p2p-provider-${Date.now()}`;
     await pageA.getByTestId('file-input').setInputFiles({
       name: 'peer-fallback.txt',
       mimeType: 'text/plain',
@@ -140,7 +141,22 @@ test('viewer fetch falls back to FIPS when blossom read servers are disabled', a
     const hashPart = shareUrl.includes('#') ? shareUrl.slice(shareUrl.indexOf('#')) : '';
     expect(hashPart.startsWith('#/nhash1')).toBe(true);
 
+    const sourcePeerId = await pageB.evaluate(() => (
+      window.__hashtreeCcP2P?.peers.find((peer) => peer.connected)?.peerId ?? ''
+    ));
+    expect(sourcePeerId).toMatch(/^(02|03)[0-9a-f]{64}$/);
+
     await pageB.goto(`/${hashPart}`);
+    await expect.poll(async () => pageB.evaluate(() => (
+      window.__hashtreeCcP2P?.blobRoutes ?? null
+    ))).toEqual([]);
+    await expect(pageB.locator('body')).not.toContainText(content, { timeout: 2_000 });
+
+    await pageB.goto(`/?provider=${encodeURIComponent(sourcePeerId)}${hashPart}`);
+    expect(new URL(pageB.url()).searchParams.get('provider')).toBe(sourcePeerId);
+    await expect.poll(async () => pageB.evaluate(() => (
+      window.__hashtreeCcP2P?.blobRoutes ?? []
+    )), { timeout: 30_000 }).toEqual([{ peerId: sourcePeerId, htl: 10 }]);
     await expect(pageB.getByTestId('file-viewer')).toBeVisible({ timeout: 20000 });
     await expect(pageB.getByTestId('viewer-text')).toContainText(content, { timeout: 20000 });
   } finally {

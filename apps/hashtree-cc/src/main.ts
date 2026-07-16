@@ -12,8 +12,8 @@ function logBackgroundServiceError(label: string, error: unknown): void {
 }
 
 async function initBackgroundServices(): Promise<void> {
-  await initWorkerClient();
   await initP2P();
+  await initWorkerClient();
   void initServiceWorker()
     .then(() => ensureHashtreeStreamingReady())
     .catch((error) => {

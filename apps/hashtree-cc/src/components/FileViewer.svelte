@@ -1,6 +1,11 @@
 <script lang="ts">
   import { uploadBuffer } from '../lib/blossomStore';
   import { buildImmutableMediaUrl } from '../lib/htreeRuntime';
+  import {
+    getLocalProviderPeerId,
+    SHARE_PROVIDER_QUERY,
+    waitForExplicitProviderRoute,
+  } from '../lib/p2p';
   import { ensureHashtreeStreamingReady } from '../lib/workerStreaming';
   import { open as openShareModal } from './ShareModal.svelte';
 
@@ -47,7 +52,12 @@
       },
     })
   );
-  const shareUrl = $derived(`${window.location.origin}/#/${nhash}/${encodeURIComponent(fileName)}`);
+  async function share() {
+    const url = new URL(`/#/${nhash}/${encodeURIComponent(decodedFileName)}`, window.location.origin);
+    const peerId = await getLocalProviderPeerId();
+    url.searchParams.set(SHARE_PROVIDER_QUERY, peerId);
+    openShareModal(url.toString());
+  }
 
   function formatSize(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`;
@@ -106,6 +116,13 @@
   }
 
   async function fetchBlob() {
+    try {
+      await waitForExplicitProviderRoute();
+    } catch (cause) {
+      error = cause instanceof Error ? cause.message : 'Shared Hashtree provider is unavailable';
+      status = 'error';
+      return;
+    }
     let streamingReady = false;
     if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
       streamingReady = await ensureHashtreeStreamingReady().catch(() => false);
@@ -210,7 +227,7 @@
           <span class="i-lucide-download"></span>
         </button>
       {/if}
-      <button class="btn-ghost text-sm" onclick={() => openShareModal(shareUrl)} title="Share">
+      <button class="btn-ghost text-sm" onclick={share} title="Share">
         <span class="i-lucide-share mr-1"></span> Share
       </button>
     </div>

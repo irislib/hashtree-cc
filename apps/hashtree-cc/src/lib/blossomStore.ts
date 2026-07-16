@@ -4,10 +4,8 @@ import {
   beginPutBlobStream,
   cancelPutBlobStream,
   finishPutBlobStream,
-  getBlob,
   putBlob,
 } from './workerClient';
-import { getFromP2P } from './p2p';
 import {
   beginLocalSaveProgressForFile,
   endLocalSaveProgress,
@@ -78,12 +76,4 @@ export async function uploadFileStream(file: File): Promise<string> {
   } finally {
     endLocalSaveProgress();
   }
-}
-
-export async function fetchBuffer(hashHex: string): Promise<Uint8Array> {
-  const peerData = await getFromP2P(hashHex);
-  if (peerData) {
-    return peerData;
-  }
-  return getBlob(hashHex);
 }

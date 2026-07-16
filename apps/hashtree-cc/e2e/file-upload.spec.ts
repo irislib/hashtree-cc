@@ -329,6 +329,7 @@ test('viewer share modal can copy link', async ({ page, context }) => {
   const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
   expect(clipboardText).toContain('nhash1');
   expect(clipboardText).toContain('/copy-test.txt');
+  expect(new URL(clipboardText).searchParams.get('provider')).toMatch(/^(02|03)[0-9a-f]{64}$/);
 });
 
 test('nhash URL shows image viewer', async ({ page }) => {

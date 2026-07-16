@@ -75,4 +75,7 @@ export default defineConfig({
   server: {
     port: 5176,
   },
+  optimizeDeps: {
+    entries: ['index.html', 'src/lib/hashtreeWorkerEntry.ts'],
+  },
 });

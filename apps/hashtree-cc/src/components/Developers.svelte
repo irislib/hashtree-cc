@@ -439,7 +439,7 @@
         App Source
       </a>
       <a
-        href="https://git.iris.to/#/npub1xdhnr9mrv47kkrn95k6cwecearydeh8e895990n3acntwvmgk2dsdeeycm/hashtree-cc/packages"
+        href="https://git.iris.to/#/npub1xdhnr9mrv47kkrn95k6cwecearydeh8e895990n3acntwvmgk2dsdeeycm/hashtree/ts/packages"
         class="btn-ghost inline-flex items-center gap-2 no-underline"
         target="_blank"
         rel="noopener"
@@ -494,7 +494,7 @@
         <ol class="text-text-3 text-xs space-y-1 pl-4 list-decimal">
           <li>Check local IndexedDB cache.</li>
           <li>If missing, fetch from Blossom read servers.</li>
-          <li>If still missing, ask connected peer transports.</li>
+          <li>If still missing, ask only the provider named by the share link.</li>
         </ol>
         <p class="text-text-3 text-xs mt-2">
           This order is applied per needed block, and remote hits are cached back to IndexedDB.
@@ -518,7 +518,9 @@
       Peer Transport
     </h3>
     <p class="text-text-2 text-sm mb-2">
-      Hashtree blob reads use verified request/response frames over FIPS. Browser links use Nostr-discovered WebRTC while native nodes can use any configured FIPS transport.
+      Hashtree blob reads use verified request/response frames over FIPS. A share
+      link explicitly names the remote provider with HTL 10; merely connecting a
+      WebRTC peer never makes it a blob source. FIPS owns path discovery and authentication.
     </p>
     <p class="text-text-3 text-xs">
       Mesh protocol:

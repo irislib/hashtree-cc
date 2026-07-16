@@ -4,7 +4,7 @@ import type { ConnectivityState } from '@hashtree/worker';
 import type { UploadProgressState } from '@hashtree/worker';
 import type { WorkerP2PProvider } from '@hashtree/worker';
 import { writable } from 'svelte/store';
-import HashtreeWorker from '@hashtree/worker/entry?worker';
+import HashtreeWorker from './hashtreeWorkerEntry?worker';
 import { settingsStore } from './settings';
 import { getRuntimeBlossomServers, getRuntimeWorkerConfig } from './htreeRuntime';
 
@@ -161,12 +161,6 @@ export async function finishPutBlobStream(streamId: string): Promise<{ hashHex: 
 export async function cancelPutBlobStream(streamId: string): Promise<void> {
   const worker = await ensureClient();
   await worker.cancelPutBlobStream(streamId);
-}
-
-export async function getBlob(hashHex: string): Promise<Uint8Array> {
-  const worker = await ensureClient();
-  const { data } = await worker.getBlob(hashHex);
-  return data;
 }
 
 export async function getBlobForPeer(hashHex: string): Promise<Uint8Array | null> {

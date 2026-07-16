@@ -63,7 +63,8 @@ function normalizeSettings(raw: unknown): HashtreeCcSettings {
   const relays = rawRelays
     .map(normalizeUrl)
     .filter(Boolean);
-  const rawServers = candidate.network?.blossomServers ?? [];
+  const hasExplicitServers = Array.isArray(candidate.network?.blossomServers);
+  const rawServers = hasExplicitServers ? candidate.network?.blossomServers ?? [] : [];
   const servers = rawServers
     .map(normalizeServer)
     .filter((server): server is BlossomServerConfig => !!server);
@@ -79,7 +80,7 @@ function normalizeSettings(raw: unknown): HashtreeCcSettings {
   return {
     network: {
       relays: relays.length > 0 ? relays : DEFAULT_SETTINGS.network.relays,
-      blossomServers: servers.length > 0 ? servers : DEFAULT_SETTINGS.network.blossomServers,
+      blossomServers: hasExplicitServers ? servers : DEFAULT_SETTINGS.network.blossomServers,
     },
     storage: {
       maxBytes: normalizedMaxBytes,

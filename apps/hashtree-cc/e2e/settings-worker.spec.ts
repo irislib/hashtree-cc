@@ -1,7 +1,8 @@
 import { test, expect } from './fixtures';
-import { createHash } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 
 const SETTINGS_KEY = 'hashtree-cc-settings-v1';
+const relayPort = process.env.TEST_RELAY_PORT ?? '14736';
 
 test('settings page persists storage/server settings and allows relay updates', async ({ page }) => {
   await page.goto('/');
@@ -119,12 +120,16 @@ test('uploaded file stays viewable after reload without blossom GET fallback', a
 });
 
 test('p2p module is initialized in hashtree-cc', async ({ page }) => {
+  const relayUrl = `ws://localhost:${relayPort}/settings-p2p-${randomUUID()}`;
+  await page.addInitScript(({ key, relay }) => {
+    window.localStorage.setItem(key, JSON.stringify({ network: { relays: [relay] } }));
+  }, { key: SETTINGS_KEY, relay: relayUrl });
   await page.goto('/');
 
   await expect.poll(async () => page.evaluate(() => {
     const state = (window as unknown as { __hashtreeCcP2P?: { started: boolean } }).__hashtreeCcP2P;
     return state?.started ?? false;
-  })).toBe(true);
+  }), { timeout: 30_000 }).toBe(true);
 
   const p2pState = await page.evaluate(() => {
     const state = (window as unknown as {
