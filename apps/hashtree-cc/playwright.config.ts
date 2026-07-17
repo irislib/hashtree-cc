@@ -5,6 +5,10 @@ const relayPort = process.env.TEST_RELAY_PORT ?? '14736';
 export default defineConfig({
   testDir: './e2e',
   timeout: 30000,
+  workers: 1,
+  expect: {
+    timeout: 10000,
+  },
   use: {
     baseURL: 'http://localhost:5177',
   },

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.5 - 2026-07-16
+
+- Upgrade to immutable FIPS TypeScript 0.0.26 and Hashtree TypeScript 0.5.0.
+  Quick Share stays thin while the shared adaptive `BlobRouter` owns bounded
+  local, exact-provider, and Blossom read selection.
+- Preserve explicit provider identity, HTL 10, central hash verification, and
+  Blossom-only behavior when no authenticated provider bridge is enabled.
+- Serialize the shared-origin browser suite and wait on bounded readiness so
+  service-worker media checks remain deterministic under host load.
+
 ## 0.1.4 - 2026-07-16
 
 - Pin the shared Hashtree worker 0.3.3 and its immutable runtime 0.4.4
