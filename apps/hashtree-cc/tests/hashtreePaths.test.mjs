@@ -5,8 +5,6 @@ import path from 'node:path';
 import test from 'node:test';
 
 import {
-  resolveHashtreeRepoRoot,
-  resolveHashtreeRustDir,
   resolveHtreeCommand,
 } from '../scripts/hashtreePaths.mjs';
 
@@ -30,38 +28,26 @@ test.afterEach(() => {
   restoreEnv();
 });
 
-test('does not auto-detect a sibling hashtree checkout', () => {
+test('uses the public htree command by default', () => {
   delete process.env.HASHTREE_REPO_ROOT;
   delete process.env.HASHTREE_RUST_DIR;
   delete process.env.HTREE_BIN;
 
-  assert.equal(resolveHashtreeRepoRoot(), null);
-  assert.equal(resolveHashtreeRustDir(), null);
   assert.deepEqual(resolveHtreeCommand('add', '.'), ['htree', 'add', '.']);
 });
 
-test('honors explicit rust workspace overrides', () => {
+test('ignores mutable sibling source and honors an explicit public binary', () => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'hashtree-cc-hashtree-'));
   const rustDir = path.join(tempRoot, 'rust');
 
   fs.mkdirSync(rustDir, { recursive: true });
   fs.writeFileSync(path.join(rustDir, 'Cargo.toml'), '[package]\nname = "hashtree-cli"\nversion = "0.0.0"\n');
   process.env.HASHTREE_RUST_DIR = rustDir;
+  delete process.env.HTREE_BIN;
 
-  assert.equal(resolveHashtreeRustDir(), rustDir);
-  assert.deepEqual(resolveHtreeCommand('add', '.'), [
-    'cargo',
-    'run',
-    '--manifest-path',
-    path.join(rustDir, 'Cargo.toml'),
-    '-p',
-    'hashtree-cli',
-    '--bin',
-    'htree',
-    '--',
-    'add',
-    '.',
-  ]);
+  assert.deepEqual(resolveHtreeCommand('add', '.'), ['htree', 'add', '.']);
+  process.env.HTREE_BIN = '/immutable/htree';
+  assert.deepEqual(resolveHtreeCommand('add', '.'), ['/immutable/htree', 'add', '.']);
 
   fs.rmSync(tempRoot, { recursive: true, force: true });
 });

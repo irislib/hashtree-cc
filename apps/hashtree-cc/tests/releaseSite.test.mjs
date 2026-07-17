@@ -37,8 +37,12 @@ test('builds a Worker release plan in build-test-publish-deploy order', () => {
 
   assert.deepEqual(
     plan.steps.map((step) => step.id),
-    ['build', 'test-1', 'test-2', 'publish', 'deploy'],
+    ['build', 'test-1', 'test-2', 'test-3', 'publish', 'deploy'],
   );
+  assert.deepEqual(plan.steps.find((step) => step.id === 'test-1')?.command, [
+    'node',
+    './scripts/verify-htree-cli.mjs',
+  ]);
   assert.deepEqual(plan.steps.at(-1)?.command, [
     'node',
     './scripts/deploy-worker-assets.mjs',
@@ -145,7 +149,7 @@ test('runs hashtree publish and Worker deploy in parallel after tests', async ()
     { buildOutputExists: () => true },
   );
 
-  assert.deepEqual(calls, ['build', 'test-1', 'test-2', 'publish', 'deploy']);
+  assert.deepEqual(calls, ['build', 'test-1', 'test-2', 'test-3', 'publish', 'deploy']);
   assert.equal(maxActiveReleaseSteps, 2);
 });
 

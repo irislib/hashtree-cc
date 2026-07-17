@@ -23,9 +23,8 @@ pnpm test:portable
 pnpm release:site -- --skip-cloudflare
 ```
 
-The release scripts use an installed `htree` by default. If you want to run
-against a local Hashtree Rust checkout instead, set `HTREE_BIN`,
-`HASHTREE_RUST_DIR`, or `HASHTREE_REPO_ROOT`.
+The release scripts require the immutable public `htree 0.2.99` CLI. Set
+`HTREE_BIN` to an extracted release binary or put that exact version on `PATH`.
 
 Git remote setup for Hashtree-first development:
 

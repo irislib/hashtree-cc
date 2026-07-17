@@ -21,6 +21,7 @@ export const releaseProfile = {
   pagesProjectEnv: 'CF_PAGES_PROJECT_HASHTREE_CC',
   buildCommand: ['pnpm', 'run', 'build'],
   testCommands: [
+    ['node', './scripts/verify-htree-cli.mjs'],
     ['node', '--test', 'tests/portable-build.test.mjs'],
     ['node', './scripts/portable-smoke.mjs'],
   ],
@@ -392,9 +393,7 @@ Environment:
   ${releaseProfile.workerNameEnv}   Default Worker name for hashtree.cc
   ${releaseProfile.pagesProjectEnv}   Default Pages project for hashtree.cc
   CF_WORKER_COMPATIBILITY_DATE   Default compatibility date for Worker deployments
-  HASHTREE_REPO_ROOT   Override a vendored hashtree checkout used for the htree CLI
-  HASHTREE_RUST_DIR   Override the rust/ directory used for the htree CLI
-  HTREE_BIN   Use an existing htree binary instead of cargo run or PATH lookup
+  HTREE_BIN   Use the immutable public htree 0.2.99 binary instead of PATH lookup
 `;
 }
 

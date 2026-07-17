@@ -7,8 +7,10 @@ const workspace = await readFile(new URL('pnpm-workspace.yaml', root), 'utf8');
 
 const fipsRoot = 'https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.26';
 const tcpRoot = 'https://github.com/mmalmi/fips-tcp/releases/download/v0.2.0';
-const hashtreeRoot =
+const hashtreeBaseRoot =
   'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.0';
+const hashtreeRoot =
+  'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.1';
 const kitRoot = 'https://github.com/mmalmi/iris-kit/releases/download/runtime-v0.2.2';
 
 const releases = {
@@ -29,7 +31,7 @@ const releases = {
     integrity: 'sha512-vqbMj4mgJdS5sAXYLe4kb9B3ZtdnNFsQof3y0W2vF4TruccMH48AmxY+J6gOKCwhOHkFFgJ9V/4m1MVKzLsIiw==',
   },
   '@hashtree/collection': {
-    url: `${hashtreeRoot}/hashtree-collection-0.2.8.tgz`,
+    url: `${hashtreeBaseRoot}/hashtree-collection-0.2.8.tgz`,
     integrity: 'sha512-lS6IvLV6WqH7KSe570ula1rRC2e9qk4nOIb07a0WcoKGnXAS3PZiy9qavzy0Zy5k8TIZegf9gOr1B6F1yusmoA==',
   },
   '@hashtree/core': {
@@ -37,7 +39,7 @@ const releases = {
     integrity: 'sha512-kh4ZhzsJTd/iLAYUeZ/+Q9EzA/Ev9FObOLcOveIvx7Ghtk6qdeiTexoGCOiu5X8VmlksxRPleCVeMh1k9/2AGA==',
   },
   '@hashtree/dexie': {
-    url: `${hashtreeRoot}/hashtree-dexie-0.1.8.tgz`,
+    url: `${hashtreeBaseRoot}/hashtree-dexie-0.1.8.tgz`,
     integrity: 'sha512-edM50fsiMYYmkTl7OkyRIV+1K5mhbTGnAliIvcJFzKlQ4++kdDIuBlHw/WrkKENgDgTEYXeta7pKbdXxyL906w==',
   },
   '@hashtree/fips-transport': {
@@ -45,20 +47,20 @@ const releases = {
     integrity: 'sha512-S4xCmpPnMzQG2ADc6p4mv+JSubtaRr6eOLyZs1utk0ac1bLumf261qy8fZqJj/MuoYSS2Y5J4uXYKyResG/bdA==',
   },
   '@hashtree/index': {
-    url: `${hashtreeRoot}/hashtree-index-0.1.12.tgz`,
+    url: `${hashtreeBaseRoot}/hashtree-index-0.1.12.tgz`,
     integrity: 'sha512-tXCCaYCwUFAkNDdO7RJ9EMY3AQe89O5aJAXtbAYcMtCaZ2uBxH9QGkQP2pKeUYorYx3MJIcubOF6ia2slEJAdw==',
   },
   '@hashtree/mesh': {
-    url: `${hashtreeRoot}/hashtree-mesh-0.2.0.tgz`,
-    integrity: 'sha512-ACtpqCVXVeLhEJLmOYWH6xIyuw5MbRVDa+pSw/VDjyqV3+BSDVHsX+cnc5mHTuFjXjwin7qpWAw66d9zlw1T0w==',
+    url: `${hashtreeRoot}/hashtree-mesh-0.3.0.tgz`,
+    integrity: 'sha512-VNy7XxQCHVaBYVubbktmVve05B+jMa5Wriq2jWGU3hiIfsyz1JicGzphG0g8pyJHjJ5gpz6UP/bnZL5bMRnViw==',
   },
   '@hashtree/nostr': {
-    url: `${hashtreeRoot}/hashtree-nostr-0.1.18.tgz`,
-    integrity: 'sha512-STk0IFdMMvMLUvsvYtXpPukdE5/6lykcvJ/0JTZh/bqUgPTKCj7OzKwmqEgBSQBRUbiJ9R+J7Z6bx1z+O3jaxA==',
+    url: `${hashtreeRoot}/hashtree-nostr-0.2.0.tgz`,
+    integrity: 'sha512-H+E91/nhktH1iVwRWaMI1cpetatq++I5N7Arza5MrlopFKUKnsZ323PWa//Uc1+hype70SKVuY4ljlGHwOcpZg==',
   },
   '@hashtree/worker': {
-    url: `${hashtreeRoot}/hashtree-worker-0.4.0.tgz`,
-    integrity: 'sha512-nqKAO7y4PfA2vNRf0PKqsIEOACq5o/Si/XwlgHtHScevmxHK7sIZqdvSFHQI67yxTSjlfB2hkBcBMkGxGrMi2A==',
+    url: `${hashtreeRoot}/hashtree-worker-0.4.1.tgz`,
+    integrity: 'sha512-EJqOBIJ61as+njOaYtvf4Px645xf5cX9RKZYdXeUUnjZ3OeNK0trk2TaYsz3uiPQDJJPwDpxKFeGPyIs/kFbnw==',
   },
   ndk: {
     url: `${kitRoot}/ndk-0.2.1.tgz`,

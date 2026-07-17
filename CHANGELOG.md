@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.6 - 2026-07-17
+
+- Upgrade to immutable Hashtree TypeScript runtime 0.5.1, including Nostr
+  adapter 0.2.0 and worker 0.4.1.
+- Keep Quick Share thin over the shared adaptive `BlobRouter`: an exact
+  provider identity uses HTL 10, while provider-less viewers remain
+  Blossom-only and never infer arbitrary connected peers.
+- Delete the mutable sibling Rust/Cargo publication fallback and require the
+  immutable public Hashtree CLI 0.2.99 artifact.
+
 ## 0.1.5 - 2026-07-16
 
 - Upgrade to immutable FIPS TypeScript 0.0.26 and Hashtree TypeScript 0.5.0.
