@@ -393,7 +393,7 @@ Environment:
   ${releaseProfile.workerNameEnv}   Default Worker name for hashtree.cc
   ${releaseProfile.pagesProjectEnv}   Default Pages project for hashtree.cc
   CF_WORKER_COMPATIBILITY_DATE   Default compatibility date for Worker deployments
-  HTREE_BIN   Use the immutable public htree 0.2.99 binary instead of PATH lookup
+  HTREE_BIN   Use the immutable public htree 0.2.114 binary instead of PATH lookup
 `;
 }
 

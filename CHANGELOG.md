@@ -5,6 +5,8 @@
 - Upgrade to FIPS TypeScript 0.0.29 and Hashtree FIPS transport 0.4.6 for
   direct FSP negotiation with legacy FMP fallback.
 - Bootstrap WebRTC negotiation through authenticated FIPS WebSocket seeds.
+- Pin publication to Hashtree CLI 0.2.114 so the release gate exercises the
+  same native authenticated seed bootstrap.
 
 ## 0.1.6 - 2026-07-17
 
