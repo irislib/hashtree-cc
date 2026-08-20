@@ -30,8 +30,8 @@
   const publicCmd = 'htree://self/myrepo';
   const linkVisibleCmd = 'htree://self/myrepo#link-visible';
   const privateCmd = 'htree://self/myrepo#private';
-  const irisBrowserUrl = 'https://browser.iris.to/';
-  const irisBrowserRepoUrl = 'https://git.iris.to/#/npub1xdhnr9mrv47kkrn95k6cwecearydeh8e895990n3acntwvmgk2dsdeeycm/iris-browser';
+  const fipsUrl = 'https://github.com/jmcorgan/fips';
+  const irisAppsUrl = 'https://apps.iris.to/';
   const gitDemoNhash = 'nhash1qqsqmafutt4u7g4x7cyx0w0k84gs7txg54v7sygkm3aspld3h7ehhyg9ypzx8wcsnd63spv9d3scr4zst2s48mv0yl36lj2c02a6vlms607nkqysxg5';
   const gitDemoViewerLink = '/#/nhash1qqsqmafutt4u7g4x7cyx0w0k84gs7txg54v7sygkm3aspld3h7ehhyg9ypzx8wcsnd63spv9d3scr4zst2s48mv0yl36lj2c02a6vlms607nkqysxg5/htree.mp4';
   let gitDemoVideoSrc = $state('');
@@ -114,7 +114,8 @@
       <div class="i-lucide-globe text-2xl text-[#34d399] mb-3"></div>
       <h3 class="text-text-1 font-semibold mb-2">Peer-to-Peer</h3>
       <p class="text-text-2 text-sm">
-        Share directly between browsers and devices over FIPS-backed peer transports.
+        Share directly between browsers and devices over
+        <a href={fipsUrl} class="text-accent hover:underline" target="_blank" rel="noopener">FIPS</a>-backed peer transports.
         Queries are forwarded through the network with <a href="https://www.hyphanet.org/" class="text-accent hover:underline" target="_blank" rel="noopener">Hyphanet</a>-style hops-to-live.
       </p>
     </div>
@@ -181,32 +182,24 @@
     </div>
   </div>
 
-  <div class="bg-surface-1 rounded-xl p-6 mb-8" data-testid="iris-browser-callout">
+  <div class="bg-surface-1 rounded-xl p-6 mb-8" data-testid="iris-apps-callout">
     <div class="flex items-start gap-4">
       <div class="i-lucide-app-window text-2xl text-[#60a5fa] mt-0.5"></div>
       <div class="space-y-3">
         <div>
-          <h3 class="text-lg font-semibold text-text-1 mb-2">Try Iris Browser</h3>
+          <h3 class="text-lg font-semibold text-text-1 mb-2">Try Iris Apps</h3>
           <p class="text-text-2 text-sm">
             Use and share apps and files without relying on web servers, domain names, or even internet access.
           </p>
         </div>
         <div class="flex flex-wrap gap-3">
           <a
-            href={irisBrowserUrl}
+            href={irisAppsUrl}
             class="btn bg-accent text-white hover:bg-accent/80 inline-flex items-center gap-2 no-underline"
             target="_blank"
             rel="noopener"
           >
-            browser.iris.to
-          </a>
-          <a
-            href={irisBrowserRepoUrl}
-            class="btn btn-outline inline-flex items-center gap-2 no-underline"
-            target="_blank"
-            rel="noopener"
-          >
-            Iris Browser code
+            apps.iris.to
           </a>
         </div>
       </div>

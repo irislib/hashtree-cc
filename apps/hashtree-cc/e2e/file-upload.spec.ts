@@ -52,18 +52,19 @@ test('developers tab highlights decentralized CDN resilience and economics', asy
   await expect(section).toContainText('video.iris.to');
 });
 
-test('developers tab links Iris Browser for app and file sharing', async ({ page }) => {
+test('developers tab links FIPS and Iris Apps', async ({ page }) => {
   await page.goto('/');
   await page.getByText('For Developers').click();
 
-  const callout = page.getByTestId('iris-browser-callout');
+  await expect(page.getByRole('link', { name: 'FIPS', exact: true }).first()).toHaveAttribute(
+    'href',
+    'https://github.com/jmcorgan/fips',
+  );
+
+  const callout = page.getByTestId('iris-apps-callout');
   await expect(callout).toBeVisible();
   await expect(callout).toContainText('Use and share apps and files without relying on web servers, domain names, or even internet access.');
-  await expect(callout.getByRole('link', { name: 'browser.iris.to' })).toHaveAttribute('href', 'https://browser.iris.to/');
-  await expect(callout.getByRole('link', { name: 'Iris Browser code' })).toHaveAttribute(
-    'href',
-    'https://git.iris.to/#/npub1xdhnr9mrv47kkrn95k6cwecearydeh8e895990n3acntwvmgk2dsdeeycm/iris-browser',
-  );
+  await expect(callout.getByRole('link', { name: 'apps.iris.to' })).toHaveAttribute('href', 'https://apps.iris.to/');
 });
 
 function mockBlossom(page: import('@playwright/test').Page, expectedHash: string, content: string | Buffer) {
