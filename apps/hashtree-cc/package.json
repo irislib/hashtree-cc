@@ -36,7 +36,7 @@
     "minidenticons": "^4.2.1",
     "ndk": "https://github.com/mmalmi/iris-kit/releases/download/runtime-v0.2.2/ndk-0.2.1.tgz",
     "ndk-cache": "https://github.com/mmalmi/iris-kit/releases/download/runtime-v0.2.2/ndk-cache-0.2.1.tgz",
-    "nostr-social-graph": "https://github.com/mmalmi/nostr-social-graph/releases/download/v2.0.0/nostr-social-graph-2.0.0.tgz",
+    "nostr-social-graph": "https://github.com/mmalmi/nostr-social-graph/releases/download/v2.0.1/nostr-social-graph-2.0.1.tgz",
     "nostr-tools": "^2.23.12",
     "qrcode": "^1.5.4"
   },
