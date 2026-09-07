@@ -23,7 +23,7 @@ pnpm run release:site
 
 `pnpm run release:site` runs the same build and portable checks, publishes the resulting `dist/` directory to the mutable site ref `htree://self/hashtree-cc-site`, and then deploys that same directory to a Cloudflare Worker service named `hashtree-cc` by default.
 
-The publish/release scripts require the immutable public `htree 0.2.99` CLI.
+The publish/release scripts require the immutable public `htree 0.2.142` CLI.
 Set `HTREE_BIN` to an extracted release binary or put that exact version on
 `PATH`.
 

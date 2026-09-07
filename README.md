@@ -23,7 +23,7 @@ pnpm test:portable
 pnpm release:site -- --skip-cloudflare
 ```
 
-The release scripts require the immutable public `htree 0.2.99` CLI. Set
+The release scripts require the immutable public `htree 0.2.142` CLI. Set
 `HTREE_BIN` to an extracted release binary or put that exact version on `PATH`.
 
 Git remote setup for Hashtree-first development:

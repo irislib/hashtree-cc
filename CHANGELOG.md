@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.8 - 2026-09-07
+
+- Require the verified Hashtree 0.2.142 release publisher.
+- Update Hashtree to security runtime 0.5.7, verifying remote blob integrity before reading or caching content.
+
 ## 0.1.7 - 2026-07-20
 
 - Upgrade to FIPS TypeScript 0.0.29 and Hashtree FIPS transport 0.4.6 for
