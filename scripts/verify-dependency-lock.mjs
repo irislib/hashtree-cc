@@ -8,11 +8,11 @@ const workspace = await readFile(new URL('pnpm-workspace.yaml', root), 'utf8');
 const fipsRoot = 'https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.29';
 const tcpRoot = 'https://github.com/mmalmi/fips-tcp/releases/download/v0.2.0';
 const hashtreeBaseRoot =
-  'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.6';
+  'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.7';
 const hashtreeRoot =
-  'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.6';
+  'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.7';
 const hashtreeFipsRoot =
-  'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.6';
+  'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.7';
 const kitRoot = 'https://github.com/mmalmi/iris-kit/releases/download/runtime-v0.2.2';
 
 const releases = {
@@ -37,36 +37,36 @@ const releases = {
     integrity: 'sha512-/K+DCBHoTyGtxEqjK4SquQ1Ua8hPjZokzQCmPtEJachd8CeQmDcmGUugRSWs9/FrVBwvfqi11DXs8eK+MZfp5Q==',
   },
   '@hashtree/collection': {
-    url: `${hashtreeBaseRoot}/hashtree-collection-0.2.9.tgz`,
-    integrity: 'sha512-8gkp1xkAaNnceCr7AUFnUQFP8owmFVyPuc+JkKqjp/YEXGhXvyFWGopSsjNV3yX9qTSlmNSUSswXg/NSAMvAhw==',
+    url: `${hashtreeBaseRoot}/hashtree-collection-0.2.10.tgz`,
+    integrity: 'sha512-eFcxjVMP6NXim2KNfZ1BvrII2S080ZfKUAYa5ZP9Dq5CcX+iAd6Esz1lAbT0VbNSSC3NCOjE8S/E8ujJ3Do8DA==',
   },
   '@hashtree/core': {
-    url: `${hashtreeRoot}/hashtree-core-0.3.1.tgz`,
-    integrity: 'sha512-NcR9gnj3wsxCdf+FaTf4YSkWB5Yi2uptgaUlH+VqXCI/dPXyUugt/5BDnc41sdiTzRX2IWP44fvJe9Pb0P+1WA==',
+    url: `${hashtreeRoot}/hashtree-core-0.3.2.tgz`,
+    integrity: 'sha512-DAMUpGBcRk6JgecIU5T3AS18gAiXpiwYG2mULq+mec9noWmaVUFBnkMt+ur12IjKik9G146z1cQV5y/oZ7MgFA==',
   },
   '@hashtree/dexie': {
-    url: `${hashtreeBaseRoot}/hashtree-dexie-0.1.9.tgz`,
-    integrity: 'sha512-tAJrryHtdIf9owiGnTcZXEJLuHf6IF6ZA6LtUgF2LTKlRyimAwLjxWoj3vD/ILDcXXCsWYMEBQ0pEz2t989/SA==',
+    url: `${hashtreeBaseRoot}/hashtree-dexie-0.1.10.tgz`,
+    integrity: 'sha512-pR58pTabGGSn9HWBgfUoa9XrJvM0Ncdffl6jBVRrhiw0/HV7aRPodcg9kSKOP9SHzgL7XkWP63e6JxB1LyXFJw==',
   },
   '@hashtree/fips-transport': {
-    url: `${hashtreeFipsRoot}/hashtree-fips-transport-0.4.9.tgz`,
-    integrity: 'sha512-CbmvLMHZ7ayse35OHOW+37T/3Y2XAv4lbDXQNPBlddG8VxVel29Cwn7Sw5rVWNOEfzbYb2WdluU9T33KnPxpng==',
+    url: `${hashtreeFipsRoot}/hashtree-fips-transport-0.4.10.tgz`,
+    integrity: 'sha512-Ly76zu+L0VSkFVRYlcCME/6TVTGVX9XSmQpbCAj2Tph3oIaN4FayDuU604Yj08xO9buyogPliyz8gPuCkJ+ZHg==',
   },
   '@hashtree/index': {
-    url: `${hashtreeBaseRoot}/hashtree-index-0.1.13.tgz`,
-    integrity: 'sha512-5/9dUXpCOJSiNs5WDgMjdy/E8lvzeNBAo/dkcBsPv/mxaa/qYL6YTaTzqd5CZVgH/usmuiefeO10LrWDRgbEXA==',
+    url: `${hashtreeBaseRoot}/hashtree-index-0.1.14.tgz`,
+    integrity: 'sha512-nEpHCj+l5aFs0oELah4DbeQwlNEAaAU3qtCZxiRTd2hLjFwbT/zlXaynatESzc5pUX2aVhYCO6aCUEjR9Cds1g==',
   },
   '@hashtree/mesh': {
-    url: `${hashtreeRoot}/hashtree-mesh-0.3.1.tgz`,
-    integrity: 'sha512-LwNuadMBunKKTsDi41ocI+b6gVY3nmhawV/RtNMl6CHARD7lFbBq5VwKt9QKVc0kNC1CL9zDuHvYi05QemsgVw==',
+    url: `${hashtreeRoot}/hashtree-mesh-0.3.2.tgz`,
+    integrity: 'sha512-qGBoQtsvh6mGUXCVIl2aClyole9ooeFDt+2v82ZvBAjkP9ddxWPJpZEULtGotGbXDrUR6bTmTbMDzUF2/HzJMw==',
   },
   '@hashtree/nostr': {
-    url: `${hashtreeRoot}/hashtree-nostr-0.2.2.tgz`,
-    integrity: 'sha512-cHlL4cn/skDmh4Ngaqti3YG9zTYkVH6rQYZZhzV2odG4vx2WVbf/q4ZS9gDBwBApZA6VSTL4KZj0hF9RUPomig==',
+    url: `${hashtreeRoot}/hashtree-nostr-0.2.3.tgz`,
+    integrity: 'sha512-gfhRxYUR+NGvenSaHnP8lX2IfuZoQGulHmoqNx55aTP1xdJ812lb/lnbq3fvCkkQG3ws/UrqtZaq0KgtARP+8Q==',
   },
   '@hashtree/worker': {
-    url: `${hashtreeRoot}/hashtree-worker-0.4.2.tgz`,
-    integrity: 'sha512-N/Ax5jANHkrIrQcEqFDmszKqsCmzL4W615A0TwvtcUZyYbpHW2rLk1qCCODYR33IzqEEpPSMTmxpWWdGt8riyA==',
+    url: `${hashtreeRoot}/hashtree-worker-0.4.3.tgz`,
+    integrity: 'sha512-kPF/hh9/umyWopvgVrrbUHHKCcGsP9DuRsc05TNJAtq2pL66Iy2JPcewIw67Hb6oIsc0EHAS8wf6bl9ypR1c6A==',
   },
   ndk: {
     url: `${kitRoot}/ndk-0.2.1.tgz`,
