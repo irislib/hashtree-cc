@@ -5,36 +5,36 @@ const manifest = JSON.parse(await readFile(new URL('apps/hashtree-cc/package.jso
 const lockfile = await readFile(new URL('pnpm-lock.yaml', root), 'utf8');
 const workspace = await readFile(new URL('pnpm-workspace.yaml', root), 'utf8');
 
-const fipsRoot = 'https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.29';
+const fipsRoot = 'https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.48';
 const tcpRoot = 'https://github.com/mmalmi/fips-tcp/releases/download/v0.2.0';
 const hashtreeBaseRoot =
   'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.7';
 const hashtreeRoot =
   'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.7';
 const hashtreeFipsRoot =
-  'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.7';
+  'https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.14';
 const kitRoot = 'https://github.com/mmalmi/iris-kit/releases/download/runtime-v0.2.2';
 
 const releases = {
   '@fips/browser': {
-    url: `${fipsRoot}/fips-browser-0.0.11.tgz`,
-    integrity: 'sha512-z5OC/hQSa7UB8YBAniRcjB+sD/JlwEWJ8ebL9SKOjh0sQ2BO0INTOXPIolDY89MBRZLHkVmjZAShDf1W+tLORA==',
+    url: `${fipsRoot}/fips-browser-0.0.16.tgz`,
+    integrity: 'sha512-GfymToRrc4hCt1rJ4ALIRo7WrM/O7/IcD9APzVqG3J7ogNrOsZCdRhPQTuBWXnjhCsn3F/e/W3/9fqpJdbfgkw==',
   },
   '@fips/core': {
-    url: `${fipsRoot}/fips-core-0.0.29.tgz`,
-    integrity: 'sha512-C5GN4Fj7D3X9riGaZwej9aoVsLG7TI8ar4RvT25Wmv+tiLsGWSY2Gn7wGAzYHqhhT7wVonc5cMjfs95qjdUwWQ==',
+    url: `${fipsRoot}/fips-core-0.0.48.tgz`,
+    integrity: 'sha512-9Ko3aX3QLgBy+1zFFySjMpLPP70PG61fOWUkguSmfIn5xFM4m7sZa7FfrY/qJnWhFvhFYdwpVVxfWv06woY5GA==',
   },
   '@fips/tcp': {
     url: `${tcpRoot}/fips-tcp-0.2.0.tgz`,
     integrity: 'sha512-KCJmltpx4cH76Sp+GOKJvYzQpwUTUtmyBA5bgcfS36ty8AxSgBQZxLdBwM59IER+B/rZpjRYFtqE6MPePL0o+w==',
   },
   '@fips/transport-webrtc': {
-    url: `${fipsRoot}/fips-transport-webrtc-0.0.45.tgz`,
-    integrity: 'sha512-aRonAlsJz56DlyBsc/IBMkKmKmrYuMuq24YLWbHfi8NmTphv6nOupWK3Tpd7DJphXgqCgKi2CnqW7PI6H2+bNw==',
+    url: `${fipsRoot}/fips-transport-webrtc-0.0.51.tgz`,
+    integrity: 'sha512-hDUvPHo7wolA/unWR8xiPpR2lLl7ECq4ut29QhdMxcEAeKNN03aBVe2BAyMWzRSdZmt3K6P1cbixSvuoQK2oAw==',
   },
   '@fips/transport-websocket': {
-    url: `${fipsRoot}/fips-transport-websocket-0.0.3.tgz`,
-    integrity: 'sha512-/K+DCBHoTyGtxEqjK4SquQ1Ua8hPjZokzQCmPtEJachd8CeQmDcmGUugRSWs9/FrVBwvfqi11DXs8eK+MZfp5Q==',
+    url: `${fipsRoot}/fips-transport-websocket-0.0.8.tgz`,
+    integrity: 'sha512-+hFqBxpGZVwmM9stFEazeDjTcB7Y6KKpFEWHaiQz92knWH0FVQQOg4hmgpby6wIcyOl7RF/onG2ck7ZAg4kiQw==',
   },
   '@hashtree/collection': {
     url: `${hashtreeBaseRoot}/hashtree-collection-0.2.10.tgz`,
@@ -49,8 +49,8 @@ const releases = {
     integrity: 'sha512-pR58pTabGGSn9HWBgfUoa9XrJvM0Ncdffl6jBVRrhiw0/HV7aRPodcg9kSKOP9SHzgL7XkWP63e6JxB1LyXFJw==',
   },
   '@hashtree/fips-transport': {
-    url: `${hashtreeFipsRoot}/hashtree-fips-transport-0.4.10.tgz`,
-    integrity: 'sha512-Ly76zu+L0VSkFVRYlcCME/6TVTGVX9XSmQpbCAj2Tph3oIaN4FayDuU604Yj08xO9buyogPliyz8gPuCkJ+ZHg==',
+    url: `${hashtreeFipsRoot}/hashtree-fips-transport-0.4.17.tgz`,
+    integrity: 'sha512-hBhfa7AEB5D7KJY0whTMsybX1Q3cYuqBb9C/nLi10TAponqRqwObv6dkKHLpycJyNZq4FbplS/pizie2eIzTpg==',
   },
   '@hashtree/index': {
     url: `${hashtreeBaseRoot}/hashtree-index-0.1.14.tgz`,

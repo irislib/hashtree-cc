@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.9 - 2026-10-01
+
+- Update peer networking to recover cleanly from invalid handshakes, reconnects and interrupted shutdowns.
+- Reduce idle routing retries and link reports with the audited shared FIPS runtime.
+
 ## 0.1.8 - 2026-09-07
 
 - Require the verified Hashtree 0.2.142 release publisher.
