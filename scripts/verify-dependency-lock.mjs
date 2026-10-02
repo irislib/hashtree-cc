@@ -29,8 +29,8 @@ const releases = {
     integrity: 'sha512-KCJmltpx4cH76Sp+GOKJvYzQpwUTUtmyBA5bgcfS36ty8AxSgBQZxLdBwM59IER+B/rZpjRYFtqE6MPePL0o+w==',
   },
   '@fips/transport-webrtc': {
-    url: `${fipsRoot}/fips-transport-webrtc-0.0.51.tgz`,
-    integrity: 'sha512-hDUvPHo7wolA/unWR8xiPpR2lLl7ECq4ut29QhdMxcEAeKNN03aBVe2BAyMWzRSdZmt3K6P1cbixSvuoQK2oAw==',
+    url: 'https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.49/fips-transport-webrtc-0.0.52.tgz',
+    integrity: 'sha512-VT22nF8LqxjXcl8cVq/8k7xcK8c0QNXoxB3pXZ7yMI+da7LkUACjc8pIkYPCZYuIjuXuIhNzNEFYbYalGRyzTw==',
   },
   '@fips/transport-websocket': {
     url: `${fipsRoot}/fips-transport-websocket-0.0.8.tgz`,
@@ -77,8 +77,8 @@ const releases = {
     integrity: 'sha512-pZWVFey1hsaviBa50inBY17WUbjs29fzReuLWFp7Ud+Sgu1H0RzeYySRQwYS8KI0qt9f+gDq3lIMrTqFPk+wYA==',
   },
   'nostr-social-graph': {
-    url: 'https://github.com/mmalmi/nostr-social-graph/releases/download/v2.0.1/nostr-social-graph-2.0.1.tgz',
-    integrity: 'sha512-7bR840Fmz7wYaHi0P9fXxxKlQSphFARmj2VBMIQdFvrNT584bj6ci18GaeJ49OghutUot/FwHmPOTjYqmg6koA==',
+    url: 'https://github.com/mmalmi/nostr-social-graph/releases/download/v2.0.3/nostr-social-graph-2.0.3.tgz',
+    integrity: 'sha512-mdPbzA0PAApbAmwrUFEvTDp/XQ4phzFCpNwwlSSXhqOBRweLRO8m6AtDoURwIEYJN4GJcDuR173ppjxCRrZhnw==',
   },
 };
 
