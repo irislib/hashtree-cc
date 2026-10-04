@@ -1,7 +1,7 @@
 # hashtree-cc
 
 Standalone workspace for the `hashtree.cc` site/app. Shared FIPS, Hashtree,
-NDK, and social-graph code comes from immutable release artifacts instead of
+Nostr, and social-graph code comes from immutable release artifacts instead of
 being copied into this repository.
 
 Source: <https://git.iris.to/#/npub1xdhnr9mrv47kkrn95k6cwecearydeh8e895990n3acntwvmgk2dsdeeycm/hashtree-cc>

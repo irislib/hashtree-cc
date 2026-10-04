@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.11 - 2026-10-04
+
+- Recover file-sharing connections after peers restart and serve downloaded public blocks from the local cache.
+- Remove unused NDK compatibility packages while preserving saved device identities and offline files.
+
 ## 0.1.10 - 2026-10-01
 
 - Keep peer connections and transfers working when a delayed connection offer arrives.

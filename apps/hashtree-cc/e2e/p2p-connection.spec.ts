@@ -108,7 +108,7 @@ test('keeps its FIPS device identity across reloads', async ({ page }) => {
   )), { timeout: 30_000 }).toBe(beforeReload);
 });
 
-test('viewer fetch uses the explicitly shared FIPS provider when blossom read servers are disabled', async ({ browser, renderLoopFailures }) => {
+test('explicit FIPS provider fetch survives reload and its cached viewer serves a third device', async ({ browser, renderLoopFailures }) => {
   test.setTimeout(120_000);
   const relayNamespace = `p2p-provider-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const relayUrl = `ws://localhost:${relayPort}/${relayNamespace}`;
@@ -159,6 +159,23 @@ test('viewer fetch uses the explicitly shared FIPS provider when blossom read se
     )), { timeout: 30_000 }).toEqual([{ peerId: sourcePeerId, htl: 10 }]);
     await expect(pageB.getByTestId('file-viewer')).toBeVisible({ timeout: 20000 });
     await expect(pageB.getByTestId('viewer-text')).toContainText(content, { timeout: 20000 });
+
+    const cachedProvider = await pageB.evaluate(() => window.__hashtreeCcP2P?.peerId ?? '');
+    expect(cachedProvider).toMatch(/^(02|03)[0-9a-f]{64}$/);
+    await pageB.reload();
+    await expect(pageB.getByTestId('viewer-text')).toContainText(content, { timeout: 20000 });
+    await expect.poll(() => pageB.evaluate(() => window.__hashtreeCcP2P?.peerId ?? ''))
+      .toBe(cachedProvider);
+    await contextA.close();
+
+    const contextC = await newContextWithRelay(browser, renderLoopFailures, relayUrl, []);
+    try {
+      const pageC = await contextC.newPage();
+      await pageC.goto(`/?provider=${encodeURIComponent(cachedProvider)}${hashPart}`);
+      await expect(pageC.getByTestId('viewer-text')).toContainText(content, { timeout: 30000 });
+    } finally {
+      await contextC.close();
+    }
   } finally {
     await Promise.all([contextA.close(), contextB.close()]);
   }
