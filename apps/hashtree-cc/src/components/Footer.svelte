@@ -2,5 +2,9 @@
   <a href="https://git.iris.to/#/npub1xdhnr9mrv47kkrn95k6cwecearydeh8e895990n3acntwvmgk2dsdeeycm/hashtree-cc" class="text-text-3 hover:text-text-2 no-underline" target="_blank" rel="noopener">
     hashtree-cc
   </a>
+  &middot;
+  <a href="https://haps.hashtree.cc" class="text-text-3 hover:text-text-2 no-underline" target="_blank" rel="noopener">
+    Haps package manager
+  </a>
   &middot; MIT License
 </footer>

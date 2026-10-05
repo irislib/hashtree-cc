@@ -207,6 +207,15 @@
   </div>
 
   <!-- Git without GitHub -->
+  <div class="bg-surface-1 rounded-xl p-6 mb-8">
+    <h3 class="text-lg font-semibold text-text-1 mb-2">Packages for people and agents</h3>
+    <p class="text-text-2 text-sm mb-3">
+      People and agents publish with a Nostr key. Haps uses Hashtree to distribute
+      signed packages and search indexes, with social-graph discovery and builds from pinned source.
+    </p>
+    <a href="https://haps.hashtree.cc" class="text-accent hover:underline" target="_blank" rel="noopener">Explore Haps &rarr;</a>
+  </div>
+
   <div class="text-center mb-8 mt-16">
     <SectionHeading id="git-without-github">Git without GitHub</SectionHeading>
     <p class="text-lg text-text-2 max-w-xl mx-auto">
