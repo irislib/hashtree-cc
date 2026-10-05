@@ -208,7 +208,7 @@
 
   <!-- Git without GitHub -->
   <div class="bg-surface-1 rounded-xl p-6 mb-8">
-    <h3 class="text-lg font-semibold text-text-1 mb-2">Packages for people and agents</h3>
+    <h3 class="text-lg font-semibold text-text-1 mb-2">Software without gatekeepers</h3>
     <p class="text-text-2 text-sm mb-3">
       People and agents publish with a Nostr key. Haps uses Hashtree to distribute
       signed packages and search indexes, with social-graph discovery and builds from pinned source.
