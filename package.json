@@ -35,7 +35,8 @@
       "devalue": "5.8.1",
       "fast-uri": "3.1.2",
       "postcss": "8.5.10",
-      "tsx>esbuild": "0.28.1"
+      "tsx>esbuild": "0.28.1",
+      "@fips/tcp": "https://github.com/mmalmi/fips-tcp/releases/download/fips-tcp-v0.2.4/fips-tcp-0.2.3.tgz"
     }
   }
 }
