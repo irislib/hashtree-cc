@@ -30,13 +30,23 @@
       "@babel/core": "7.29.6",
       "@babel/plugin-transform-modules-systemjs": "7.29.4",
       "@rollup/plugin-terser>serialize-javascript": "7.0.5",
-      "brace-expansion@5.0.5": "5.0.6",
+      "brace-expansion@5.0.5": "5.0.12",
       "defu": "6.1.5",
-      "devalue": "5.8.1",
-      "fast-uri": "3.1.2",
-      "postcss": "8.5.10",
+      "devalue": "5.9.3",
+      "fast-uri": "3.1.8",
+      "postcss": "8.5.23",
       "tsx>esbuild": "0.28.1",
-      "@fips/tcp": "https://github.com/mmalmi/fips-tcp/releases/download/fips-tcp-v0.2.4/fips-tcp-0.2.3.tgz"
+      "@fips/tcp": "https://github.com/mmalmi/fips-tcp/releases/download/fips-tcp-v0.2.4/fips-tcp-0.2.3.tgz",
+      "brace-expansion@>=2.0.0 <2.1.7": "2.1.7",
+      "brace-expansion@>=5.0.0 <5.0.12": "5.0.12",
+      "fast-uri@>=3.0.0 <3.1.8": "3.1.8",
+      "postcss@>=8.0.0 <8.5.23": "8.5.23",
+      "nanoid@>=3.0.0 <3.3.18": "3.3.18",
+      "browserslist@>=4.0.0 <4.28.7": "4.28.7",
+      "baseline-browser-mapping@>=2.0.0 <2.11.0": "2.11.0",
+      "devalue@>=5.0.0 <5.9.3": "5.9.3",
+      "source-map-js@>=1.0.0 <1.2.2": "1.2.2",
+      "vite@>=6.0.0 <6.4.4": "6.4.4"
     }
   }
 }
