@@ -117,7 +117,7 @@
 
   async function fetchBlob() {
     try {
-      await waitForExplicitProviderRoute();
+      await waitForExplicitProviderRoute(nhash);
     } catch (cause) {
       error = cause instanceof Error ? cause.message : 'Shared Hashtree provider is unavailable';
       status = 'error';

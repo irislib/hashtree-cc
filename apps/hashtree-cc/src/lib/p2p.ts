@@ -1,4 +1,4 @@
-import { toHex, type Store } from '@hashtree/core';
+import { nhashDecode, toHex, type Store } from '@hashtree/core';
 import { DEFAULT_RELAYS as DEFAULT_NOSTR_RELAYS } from '@hashtree/nostr';
 import { DEFAULT_FIPS_DISCOVERY_APP } from '@hashtree/fips-transport';
 import {
@@ -16,7 +16,7 @@ import { writable } from 'svelte/store';
 import {
   blossomBandwidthStore,
   getBlobForPeer,
-  putBlob,
+  getWorkerClient,
   setP2PProvider,
 } from './workerClient';
 import { settingsStore } from './settings';
@@ -221,8 +221,10 @@ function setupBlossomBandwidthSync(): void {
 function createLocalStoreAdapter(): Store {
   return {
     put: async (hash, data) => {
-      const stored = await putBlob(data, 'application/octet-stream', false);
-      return stored.hashHex === toHex(hash);
+      const worker = await getWorkerClient();
+      const hashHex = toHex(hash);
+      const stored = await worker.putBlock(data, { hashHex, peerShare: true });
+      return stored.hashHex === hashHex;
     },
     get: async (hash) => getBlobForPeer(toHex(hash)),
     has: async (hash) => !!await getBlobForPeer(toHex(hash)),
@@ -340,7 +342,11 @@ export async function getLocalProviderPeerId(): Promise<string> {
   return toHex(identity.publicKey);
 }
 
-export async function waitForExplicitProviderRoute(): Promise<void> {
+export async function waitForExplicitProviderRoute(nhash: string): Promise<void> {
+  if (getExplicitProviderRoutes().length === 0) return;
+  const worker = await getWorkerClient();
+  const hashHex = toHex(nhashDecode(nhash).hash);
+  if ((await worker.hasBlob(hashHex, { sourceIds: ['idb'] })).available) return;
   await initP2P();
   const route = activeBlobRoutes[0];
   if (!route || (peerStats.get(route.peerId)?.sessionsEstablished ?? 0) > 0) return;
@@ -367,5 +373,10 @@ export async function waitForExplicitProviderRoute(): Promise<void> {
     });
     if (settled) unsubscribe();
     else if ((peerStats.get(route.peerId)?.sessionsEstablished ?? 0) > 0) finish();
+    else {
+      // The shared URL names this peer even when its discovery announcement predates a reload.
+      // Keep listening for a routed session if the direct connection is unavailable.
+      void active.node.connect({ transport: 'webrtc', addr: route.peerId }).then(() => finish(), () => {});
+    }
   });
 }

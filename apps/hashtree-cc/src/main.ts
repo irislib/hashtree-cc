@@ -12,13 +12,12 @@ function logBackgroundServiceError(label: string, error: unknown): void {
 }
 
 async function initBackgroundServices(): Promise<void> {
-  await initP2P();
-  await initWorkerClient();
   void initServiceWorker()
     .then(() => ensureHashtreeStreamingReady())
     .catch((error) => {
       logBackgroundServiceError('service-worker', error);
     });
+  await Promise.all([initP2P(), initWorkerClient()]);
 }
 
 void initBackgroundServices().catch((error) => {

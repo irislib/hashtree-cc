@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures';
 import { createHash } from 'crypto';
+import { readFile } from 'node:fs/promises';
 import { encryptionMode, nhashDecode } from '@hashtree/core';
 
 const SAVE_WITH_ENTER = process.platform === 'darwin' ? 'Meta+Enter' : 'Control+Enter';
@@ -31,8 +32,7 @@ test('developers tab shows git demo video player', async ({ page }) => {
   await expect(video).toHaveAttribute('src', /\/htree\/nhash1qqsqmafutt4u7g4x7cyx0w0k84gs7txg54v7sygkm3aspld3h7ehhyg9ypzx8wcsnd63spv9d3scr4zst2s48mv0yl36lj2c02a6vlms607nkqysxg5\/htree\.mp4\?htree_c=.*htree_t=video%2Fmp4/);
   await expect(video).toHaveAttribute('controls', '');
   await expect(video).not.toHaveAttribute('autoplay', '');
-  const box = await video.boundingBox();
-  expect(box?.height ?? 0).toBeGreaterThan(150);
+  await expect.poll(async () => (await video.boundingBox())?.height ?? 0).toBeGreaterThan(150);
   await expect(page.getByTestId('git-demo-video-caption')).toHaveText('The above video is delivered and streamed via Hashtree: a decentralized CDN.');
 });
 
@@ -336,26 +336,24 @@ test('viewer share modal can copy link', async ({ page, context }) => {
 });
 
 test('nhash URL shows image viewer', async ({ page }) => {
-  const pngBytes = Buffer.from(
-    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
-    'base64'
-  );
-  const expectedHash = createHash('sha256').update(pngBytes).digest('hex');
-
-  await mockBlossom(page, expectedHash, pngBytes);
+  const imageBytes = await readFile(new URL('../public/screenshot-hashtree-cc.webp', import.meta.url));
+  await page.addInitScript(() => localStorage.setItem('hashtree-cc-settings-v1', JSON.stringify({
+    network: { relays: [], blossomServers: [] },
+  })));
 
   await page.goto('/');
   await page.getByTestId('file-input').setInputFiles({
-    name: 'photo.png',
-    mimeType: 'image/png',
-    buffer: pngBytes,
+    name: 'photo.webp',
+    mimeType: 'image/webp',
+    buffer: imageBytes,
   });
 
-  await expect(page.getByTestId('file-viewer')).toBeVisible({ timeout: 10000 });
-  await expect(page.getByTestId('viewer-image')).toBeVisible();
-  await expect.poll(async () => page.getByTestId('viewer-image').getAttribute('src')).toContain('/htree/');
-  const src = await page.getByTestId('viewer-image').getAttribute('src');
-  expect(src).not.toContain('blob:');
+  const image = page.getByTestId('viewer-image');
+  await expect(image).toHaveAttribute('src', /^\/htree\//);
+  await expect.poll(() => image.evaluate((element: HTMLImageElement) =>
+    element.complete && element.naturalWidth > 0 && element.naturalHeight > 0
+  )).toBe(true);
+  await expect(image).toBeVisible();
 });
 
 test('nhash URL shows download for unknown type', async ({ page }) => {

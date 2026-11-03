@@ -141,9 +141,7 @@ test('explicit FIPS provider fetch survives reload and its cached viewer serves 
     const hashPart = shareUrl.includes('#') ? shareUrl.slice(shareUrl.indexOf('#')) : '';
     expect(hashPart.startsWith('#/nhash1')).toBe(true);
 
-    const sourcePeerId = await pageB.evaluate(() => (
-      window.__hashtreeCcP2P?.peers.find((peer) => peer.connected)?.peerId ?? ''
-    ));
+    const sourcePeerId = await pageA.evaluate(() => window.__hashtreeCcP2P?.peerId ?? '');
     expect(sourcePeerId).toMatch(/^(02|03)[0-9a-f]{64}$/);
 
     await pageB.goto(`/${hashPart}`);

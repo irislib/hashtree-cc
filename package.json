@@ -36,6 +36,7 @@
       "fast-uri": "3.1.8",
       "postcss": "8.5.23",
       "tsx>esbuild": "0.28.1",
+      "@fips/core": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.56/fips-core-0.0.52.tgz",
       "@fips/tcp": "https://github.com/mmalmi/fips-tcp/releases/download/fips-tcp-v0.2.4/fips-tcp-0.2.3.tgz",
       "brace-expansion@>=2.0.0 <2.1.7": "2.1.7",
       "brace-expansion@>=5.0.0 <5.0.12": "5.0.12",

@@ -110,8 +110,8 @@ async function ensureClient(): Promise<HashtreeWorkerClient> {
       storageMaxBytes: settings.storage.maxBytes,
       connectivityProbeIntervalMs: CONNECTIVITY_POLL_INTERVAL_MS,
     }));
-    created.setP2PProvider(p2pProvider);
     await created.init();
+    created.setP2PProvider(p2pProvider);
     syncSettingsToWorker(created);
     startConnectivityPolling(created);
     startUploadProgressUpdates(created);
