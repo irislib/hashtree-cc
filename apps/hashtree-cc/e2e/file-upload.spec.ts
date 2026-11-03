@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures';
 import { createHash } from 'crypto';
+import { encryptionMode, nhashDecode } from '@hashtree/core';
 
 const SAVE_WITH_ENTER = process.platform === 'darwin' ? 'Meta+Enter' : 'Control+Enter';
 
@@ -113,7 +114,8 @@ test('file upload navigates to viewer with nhash URL', async ({ page }) => {
   await expect(page.getByTestId('file-viewer')).toBeVisible({ timeout: 10000 });
 
   // URL has nhash and filename
-  expect(page.url()).toContain('#/nhash1');
+  const nhash = new URL(page.url()).hash.split('/')[1];
+  expect(encryptionMode(nhashDecode(nhash).key!)).toBe('chk-v1');
   expect(page.url()).toContain('/test.txt');
 
   // Text content is shown
