@@ -20,6 +20,7 @@ const MB = 1024 * 1024;
 export const DEFAULT_SETTINGS: HashtreeCcSettings = {
   network: {
     relays: [
+      'wss://relay.ditto.pub',
       'wss://relay.primal.net',
       'wss://temp.iris.to',
       'wss://relay.damus.io',
@@ -56,10 +57,12 @@ function normalizeServer(server: BlossomServerConfig): BlossomServerConfig | nul
 
 function normalizeSettings(raw: unknown): HashtreeCcSettings {
   if (!raw || typeof raw !== 'object') {
-    return DEFAULT_SETTINGS;
+    return { ...DEFAULT_SETTINGS, network: { ...DEFAULT_SETTINGS.network, relays: [] } };
   }
   const candidate = raw as Partial<HashtreeCcSettings>;
-  const rawRelays = candidate.network?.relays ?? [];
+  const selectedRelays = candidate.network?.relays;
+  const rawRelays = Array.isArray(selectedRelays) && selectedRelays.every(url => typeof url === 'string')
+    ? selectedRelays : [];
   const relays = rawRelays
     .map(normalizeUrl)
     .filter(Boolean);
@@ -79,7 +82,7 @@ function normalizeSettings(raw: unknown): HashtreeCcSettings {
 
   return {
     network: {
-      relays: relays.length > 0 ? relays : DEFAULT_SETTINGS.network.relays,
+      relays,
       blossomServers: hasExplicitServers ? servers : DEFAULT_SETTINGS.network.blossomServers,
     },
     storage: {
@@ -95,10 +98,10 @@ function loadSettings(): HashtreeCcSettings {
   if (typeof window === 'undefined') return DEFAULT_SETTINGS;
   try {
     const stored = window.localStorage.getItem(SETTINGS_KEY);
-    if (!stored) return DEFAULT_SETTINGS;
+    if (stored === null) return DEFAULT_SETTINGS;
     return normalizeSettings(JSON.parse(stored));
   } catch {
-    return DEFAULT_SETTINGS;
+    return { ...DEFAULT_SETTINGS, network: { ...DEFAULT_SETTINGS.network, relays: [] } };
   }
 }
 

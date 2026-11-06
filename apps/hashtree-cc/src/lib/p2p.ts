@@ -28,11 +28,11 @@ const PROVIDER_CONNECT_TIMEOUT_MS = 30_000;
 const REMOTE_BLOB_HTL = 10;
 export const SHARE_PROVIDER_QUERY = 'provider';
 
-const DEFAULT_RELAYS = DEFAULT_NOSTR_RELAYS.filter((relay) =>
+const DEFAULT_RELAYS = ['wss://relay.ditto.pub', ...DEFAULT_NOSTR_RELAYS.filter((relay) =>
   relay === 'wss://relay.primal.net'
   || relay === 'wss://relay.snort.social'
   || relay === 'wss://temp.iris.to'
-);
+)];
 
 export type P2PRelayStatus = 'connected' | 'connecting' | 'disconnected';
 
@@ -139,7 +139,7 @@ function normalizeRelay(relay: string): string {
 }
 
 function normalizeRelays(relays: string[] | undefined): string[] {
-  const source = relays && relays.length > 0 ? relays : DEFAULT_RELAYS;
+  const source = relays ?? DEFAULT_RELAYS;
   return getEffectiveRelayUrls(source.map(normalizeRelay).filter(Boolean));
 }
 
