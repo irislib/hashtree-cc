@@ -1,3 +1,4 @@
+import { mapAssetPrelude } from './portable-map-assets.mjs';
 import http from 'node:http';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
@@ -44,7 +45,8 @@ async function startServer(rootDir) {
     try {
       const requestUrl = new URL(req.url ?? `${prefix}/`, 'http://127.0.0.1');
       const filePath = safeJoin(rootDir, decodeURIComponent(requestUrl.pathname));
-      const body = await readFile(filePath);
+      let body = await readFile(filePath);
+      if (process.env.MAP_FIXTURE_CACHE_URL && path.extname(filePath) === '.js') body = Buffer.concat([Buffer.from(mapAssetPrelude(process.env.MAP_FIXTURE_CACHE_URL)), body]);
       res.writeHead(200, {
         'content-type': contentTypeFor(filePath),
         'cache-control': 'no-store',
@@ -140,7 +142,7 @@ page.on('pageerror', (error) => {
 });
 page.on('console', (message) => {
   if (message.type() === 'error') {
-    consoleErrors.push(message.text());
+    consoleErrors.push(`${message.text()} ${message.location().url}`);
   }
 });
 
