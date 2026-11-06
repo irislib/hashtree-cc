@@ -7,24 +7,24 @@ const workspace = await readFile(new URL('pnpm-workspace.yaml', root), 'utf8');
 
 const releases = {
   "@fips/browser": {
-    "url": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.55/fips-browser-0.0.17.tgz",
-    "integrity": "sha512-AASnq0OizIitTHvLiOkKFMUK4qbGMF9CHJcPzZM3hLjFcNFqMMNk4TBvTPjjlXiVgJrLRzLRaz2SpzeyEZu3Qg=="
+    "url": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.59/fips-browser-0.0.19.tgz",
+    "integrity": "sha512-f2TqiQ+XKSupPtYnjtHBSWSVocVa8RT26xivVf4FbcipH6t/bOSCBuHuWoY2crozj7MRrtqImGsq/reulVy+Ng=="
   },
   "@fips/core": {
-    "url": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.56/fips-core-0.0.52.tgz",
-    "integrity": "sha512-omsxRDNQ0iqEBipCD0sOhodDYm0p8cnjt/6BmcDBvtDgQx9F+wL0LXO8hN7MtqZ7KI40wc/gACAudP2+gscXew=="
+    "url": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.59/fips-core-0.0.54.tgz",
+    "integrity": "sha512-Ugzc8fdCr634XcExsGRC8oQpC5ZgJdiejt71N8auSlhJxFhf5tZcdR+dlbSYrlvQDh73jvyBkfXVeqQquR/Z6A=="
   },
   "@fips/tcp": {
     "url": "https://github.com/mmalmi/fips-tcp/releases/download/fips-tcp-v0.2.4/fips-tcp-0.2.3.tgz",
     "integrity": "sha512-0j7ucAgb7SFLkHHKMjJmR4v29psVmGoShiSgpba5IgJqAT/lJGTTKlHoAItKie+oNsiPGf/ww4YMuLTRYov2TA=="
   },
   "@fips/transport-webrtc": {
-    "url": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.57/fips-transport-webrtc-0.0.56.tgz",
-    "integrity": "sha512-rxRtF4TLPuRicue+GeuG/jsIJXFUmOYRLQDlgULJYMPFcf1JO1dD1B7RgrjT+bF6ssGrNoNP+NUd77lKnTli2Q=="
+    "url": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.59/fips-transport-webrtc-0.0.58.tgz",
+    "integrity": "sha512-JLhrH4onQBbMkuJgApyc9ADLUVDegPywVSA9+UnrSI9zkftIKwGD7fKBKigq5pCW3NQkoLG8KxJPiHTLvsswag=="
   },
   "@fips/transport-websocket": {
-    "url": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.54/fips-transport-websocket-0.0.9.tgz",
-    "integrity": "sha512-y9SkW2IbTt9ElXO89+184PuYCnMyODtojeKfzQg34iQIOpEpebvi/mPzvZjWNFk6e2gAfu3aG1/V+TiSU9XsFA=="
+    "url": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.59/fips-transport-websocket-0.0.12.tgz",
+    "integrity": "sha512-vblFMNIcC4wWSAHrnnAP39spJZeaUTJpNesWGMzx7AJJqT0yt94j0wSCoujiXsXGLbDXajI6OkrPkgOcQSCNGA=="
   },
   "@hashtree/collection": {
     "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.27/hashtree-collection-0.2.11.tgz",
@@ -51,24 +51,24 @@ const releases = {
     "integrity": "sha512-fiLvKjbEO1J/fuj6wcLGjI3RPsPrGgSuc2O+QqN/vX3OSHI7uPS+feH49vFduUMHYM79Yvsrq6MV2XDUiGq59A=="
   },
   "@hashtree/nostr": {
-    "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.27/hashtree-nostr-0.2.6.tgz",
-    "integrity": "sha512-rLumTs98r1AFAaYu1bnY7MUiF7M5hsehjnjB4GV7b68OBcdGpyWqT6ccBULmH4VLstyCU6d/qYxqu3ctlZbjUg=="
+    "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.40/hashtree-nostr-0.2.7.tgz",
+    "integrity": "sha512-ah0pS1PDckTkz/QntsNn9D9aFPcJWb7BDjBvaVtY9gaWryiWMvXv0QaGbTU5aGIqRd32BLmnojNDXHPJ/IkIhQ=="
   },
   "@hashtree/nostr-pubsub": {
     "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.27/hashtree-nostr-pubsub-0.1.9.tgz",
     "integrity": "sha512-7QfJ1LwAYb8ThdA/ECXJQYxh7BjQk/gTQS+XAfnZvzjxx5YSDRjGj+7bqLtbDdIAPDuIA9dUNYCfH8oj9RLdPQ=="
   },
   "@hashtree/worker": {
-    "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.38/hashtree-worker-0.4.23.tgz",
-    "integrity": "sha512-VoCicyPS1ksStzr1swScV1UZ8MwnwaiI02HKq4xRV6ZVee8ukWv8JkhKaj2e4RSOZ32cnoHC+KheowGrKrdeBA=="
+    "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.41/hashtree-worker-0.4.25.tgz",
+    "integrity": "sha512-viUPl2JUtrfJENEWZPvaTtT5x73Pvj5EmHn7qjsTP5T01uOg0tDm7xJww3cf6x23LILi6drOh97ss0WWYq/KVA=="
   },
   "nostr-pubsub": {
     "url": "https://github.com/mmalmi/nostr-pubsub/releases/download/nostr-pubsub-ts-v0.5.20/nostr-pubsub-0.5.20.tgz",
     "integrity": "sha512-1Cwdk2LR4oCtxiOR1t5+KmdrzDUKrqZfbIZzpXrOR0g+Ex3DCZ33him/qPWU/iYTChPl9eUgi1ZdhL0KdQWZWQ=="
   },
   "nostr-social-graph": {
-    "url": "https://github.com/mmalmi/nostr-social-graph/releases/download/v4.0.3/nostr-social-graph-4.0.3.tgz",
-    "integrity": "sha512-8IJtPhoDrWZvCrNiq5/Z2A+70oZZP8xFYasXt76FwmPspTuO8edEuqDH7kbPq83Vwm+1m1s8Vwpl/lF7JbXL7w=="
+    "url": "https://github.com/mmalmi/nostr-social-graph/releases/download/v4.0.4/nostr-social-graph-4.0.4.tgz",
+    "integrity": "sha512-7lMB0fYsjIBQwn/03lY8+0gq41rzifG4hmp5iczjrdBZ/FWQQvkkrH2HGtL80lMhkYr5+UqV63DaBdtoaReDtA=="
   }
 };
 

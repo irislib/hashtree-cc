@@ -1,6 +1,6 @@
 {
   "name": "hashtree-cc",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "license": "MIT",
   "private": true,
   "description": "hashtree.cc - decentralized file sharing & developer tools",
@@ -26,15 +26,15 @@
     "release:site": "node ./scripts/release-site.mjs"
   },
   "dependencies": {
-    "@fips/browser": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.55/fips-browser-0.0.17.tgz",
-    "@fips/core": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.56/fips-core-0.0.52.tgz",
-    "@fips/transport-webrtc": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.57/fips-transport-webrtc-0.0.56.tgz",
+    "@fips/browser": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.59/fips-browser-0.0.19.tgz",
+    "@fips/core": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.59/fips-core-0.0.54.tgz",
+    "@fips/transport-webrtc": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.59/fips-transport-webrtc-0.0.58.tgz",
     "@hashtree/core": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.27/hashtree-core-0.4.0.tgz",
     "@hashtree/fips-transport": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.38/hashtree-fips-transport-0.5.0.tgz",
-    "@hashtree/nostr": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.27/hashtree-nostr-0.2.6.tgz",
-    "@hashtree/worker": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.38/hashtree-worker-0.4.23.tgz",
+    "@hashtree/nostr": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.40/hashtree-nostr-0.2.7.tgz",
+    "@hashtree/worker": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.41/hashtree-worker-0.4.25.tgz",
     "minidenticons": "^4.2.1",
-    "nostr-social-graph": "https://github.com/mmalmi/nostr-social-graph/releases/download/v4.0.3/nostr-social-graph-4.0.3.tgz",
+    "nostr-social-graph": "https://github.com/mmalmi/nostr-social-graph/releases/download/v4.0.4/nostr-social-graph-4.0.4.tgz",
     "nostr-tools": "^2.23.12",
     "qrcode": "^1.5.4"
   },
