@@ -1,10 +1,39 @@
 import type { Browser, BrowserContext, Page } from '@playwright/test';
-import { test, expect } from './fixtures';
+import { test as base, expect } from './fixtures';
+import { startLocalFipsWebSocketSeed, type LocalFipsWebSocketSeed } from './localFipsWebSocketSeed';
 import { attachRenderLoopGuardToContext } from './renderLoopGuard';
 
 const SETTINGS_KEY = 'hashtree-cc-settings-v1';
 const GB = 1024 * 1024 * 1024;
 const relayPort = process.env.TEST_RELAY_PORT ?? '14736';
+
+// Match only the production provider's two default seed destinations.
+// Nostr, arbitrary WebSockets, workers and all network-denial controls are unchanged.
+const PUBLIC_FIPS_SEEDS = ['wss://fips1.iris.to/fips', 'wss://fips2.iris.to/fips'];
+const test = base.extend<{ localFipsSeeds: LocalFipsWebSocketSeed[] }>({
+  localFipsSeeds: async ({}, use) => {
+    const seeds: LocalFipsWebSocketSeed[] = [];
+    try {
+      for (const _ of PUBLIC_FIPS_SEEDS) seeds.push(await startLocalFipsWebSocketSeed());
+      await use(seeds);
+    } finally {
+      await Promise.all(seeds.map(seed => seed.close()));
+    }
+  },
+});
+
+async function useLocalFipsSeeds(context: BrowserContext, seeds: LocalFipsWebSocketSeed[]): Promise<void> {
+  expect(seeds).toHaveLength(PUBLIC_FIPS_SEEDS.length);
+  await context.addInitScript(({ publicUrls, localUrls }) => {
+    const destinations = new Map(publicUrls.map((url, index) => [url, localUrls[index]]));
+    const NativeWebSocket = globalThis.WebSocket;
+    globalThis.WebSocket = class extends NativeWebSocket {
+      constructor(url: string | URL, protocols?: string | string[]) {
+        super(destinations.get(new URL(url).href) ?? url, protocols);
+      }
+    };
+  }, { publicUrls: PUBLIC_FIPS_SEEDS, localUrls: seeds.map(seed => seed.url) });
+}
 
 function buildSettings(relayUrl: string, blossomServers = [
   { url: 'https://blossom.primal.net', read: true, write: true },
@@ -27,9 +56,11 @@ async function newContextWithRelay(
   browser: Browser,
   failures: Set<string>,
   relayUrl: string,
+  localFipsSeeds: LocalFipsWebSocketSeed[],
   blossomServers = [{ url: 'https://blossom.primal.net', read: true, write: true }]
 ): Promise<BrowserContext> {
   const context = await browser.newContext();
+  await useLocalFipsSeeds(context, localFipsSeeds);
   attachRenderLoopGuardToContext(context, failures);
   const settings = buildSettings(relayUrl, blossomServers);
   await context.addInitScript(({ key, value }) => {
@@ -45,12 +76,12 @@ async function getPeerCount(page: Page): Promise<number> {
   });
 }
 
-test('two isolated sessions discover and connect over FIPS WebRTC', async ({ browser, renderLoopFailures }) => {
+test('two isolated sessions discover and connect over FIPS WebRTC', async ({ browser, renderLoopFailures, localFipsSeeds }) => {
   const relayNamespace = `p2p-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const relayUrl = `ws://localhost:${relayPort}/${relayNamespace}`;
 
-  const contextA = await newContextWithRelay(browser, renderLoopFailures, relayUrl);
-  const contextB = await newContextWithRelay(browser, renderLoopFailures, relayUrl);
+  const contextA = await newContextWithRelay(browser, renderLoopFailures, relayUrl, localFipsSeeds);
+  const contextB = await newContextWithRelay(browser, renderLoopFailures, relayUrl, localFipsSeeds);
 
   const pageA = await contextA.newPage();
   const pageB = await contextB.newPage();
@@ -95,7 +126,8 @@ test('two isolated sessions discover and connect over FIPS WebRTC', async ({ bro
   }
 });
 
-test('keeps its FIPS device identity across reloads', async ({ page }) => {
+test('keeps its FIPS device identity across reloads', async ({ page, localFipsSeeds }) => {
+  await useLocalFipsSeeds(page.context(), localFipsSeeds);
   await page.goto('/');
   await expect.poll(async () => page.evaluate(() => (
     window.__hashtreeCcP2P?.pubkey ?? ''
@@ -142,14 +174,14 @@ async function expectFreshExplicitPeerBlock(sender: Page, receiver: Page) {
   }, block.hash)).toEqual({ text: block.text, source: 'p2p' });
 }
 
-test('explicit FIPS provider fetch survives reload and its cached viewer serves a third device', async ({ browser, renderLoopFailures }) => {
+test('explicit FIPS provider fetch survives reload and its cached viewer serves a third device', async ({ browser, renderLoopFailures, localFipsSeeds }) => {
   // Keep all old phase limits and budget two added 60-second recoveries.
   test.setTimeout(280_000);
   const relayNamespace = `p2p-provider-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const relayUrl = `ws://localhost:${relayPort}/${relayNamespace}`;
 
-  const contextA = await newContextWithRelay(browser, renderLoopFailures, relayUrl, []);
-  const contextB = await newContextWithRelay(browser, renderLoopFailures, relayUrl, []);
+  const contextA = await newContextWithRelay(browser, renderLoopFailures, relayUrl, localFipsSeeds, []);
+  const contextB = await newContextWithRelay(browser, renderLoopFailures, relayUrl, localFipsSeeds, []);
   const pageA = await contextA.newPage();
   const pageB = await contextB.newPage();
 
@@ -220,7 +252,7 @@ test('explicit FIPS provider fetch survives reload and its cached viewer serves 
       identityStable: true, bothPeersConnected: true, freshTransfer: true, source: 'p2p' }));
     await contextA.close();
 
-    const contextC = await newContextWithRelay(browser, renderLoopFailures, relayUrl, []);
+    const contextC = await newContextWithRelay(browser, renderLoopFailures, relayUrl, localFipsSeeds, []);
     try {
       const pageC = await contextC.newPage();
       await pageC.goto(`/?provider=${encodeURIComponent(cachedProvider)}${hashPart}`);
