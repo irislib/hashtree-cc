@@ -108,8 +108,43 @@ test('keeps its FIPS device identity across reloads', async ({ page }) => {
   )), { timeout: 30_000 }).toBe(beforeReload);
 });
 
+
+async function expectExplicitPeerPair(first: Page, second: Page, firstId: string, secondId: string) {
+  expect(firstId).not.toBe(secondId);
+  const state = (page: Page, otherId: string) => page.evaluate(other => {
+    const current = window.__hashtreeCcP2P;
+    return { id: current?.peerId ?? '', connected: current?.peers.some(peer => peer.peerId === other && peer.connected) ?? false };
+  }, otherId);
+  await Promise.all([
+    expect.poll(() => state(first, secondId), { timeout: 60_000 }).toEqual({ id: firstId, connected: true }),
+    expect.poll(() => state(second, firstId), { timeout: 60_000 }).toEqual({ id: secondId, connected: true }),
+  ]);
+}
+
+async function expectFreshExplicitPeerBlock(sender: Page, receiver: Page) {
+  const block = await sender.evaluate(async () => {
+    const path = '/src/lib/workerClient.ts';
+    const client = await (await import(path)).getWorkerClient();
+    const text = `reloaded-explicit-peer-${crypto.randomUUID()}`;
+    const stored = await client.putBlock(new TextEncoder().encode(text), { upload: false });
+    return { hash: stored.hashHex, text };
+  });
+  expect(await receiver.evaluate(async hash => {
+    const path = '/src/lib/workerClient.ts';
+    const client = await (await import(path)).getWorkerClient();
+    return (await client.hasBlob(hash, { sourceIds: ['idb'] })).available;
+  }, block.hash)).toBe(false);
+  expect(await receiver.evaluate(async hash => {
+    const path = '/src/lib/workerClient.ts';
+    const client = await (await import(path)).getWorkerClient();
+    const received = await client.getBlob(hash);
+    return { text: new TextDecoder().decode(received.data), source: received.source };
+  }, block.hash)).toEqual({ text: block.text, source: 'p2p' });
+}
+
 test('explicit FIPS provider fetch survives reload and its cached viewer serves a third device', async ({ browser, renderLoopFailures }) => {
-  test.setTimeout(120_000);
+  // Keep all old phase limits and budget two added 60-second recoveries.
+  test.setTimeout(280_000);
   const relayNamespace = `p2p-provider-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const relayUrl = `ws://localhost:${relayPort}/${relayNamespace}`;
 
@@ -164,6 +199,25 @@ test('explicit FIPS provider fetch survives reload and its cached viewer serves 
     await expect(pageB.getByTestId('viewer-text')).toContainText(content, { timeout: 20000 });
     await expect.poll(() => pageB.evaluate(() => window.__hashtreeCcP2P?.peerId ?? ''))
       .toBe(cachedProvider);
+    // A receiver must explicitly name its provider. Set the real share URL
+    // before reload; the application's default empty provider routes stay intact.
+    await pageA.evaluate(peerId => {
+      const url = new URL(location.href);
+      url.searchParams.set('provider', peerId);
+      history.replaceState(null, '', url);
+    }, cachedProvider);
+    await pageA.reload();
+    await expectExplicitPeerPair(pageA, pageB, sourcePeerId, cachedProvider);
+    await expect.poll(() => pageA.evaluate(() => window.__hashtreeCcP2P?.blobRoutes ?? []))
+      .toEqual([{ peerId: cachedProvider, htl: 10 }]);
+    await expectFreshExplicitPeerBlock(pageA, pageB);
+    console.log('BROWSER_PEER_RELOAD', JSON.stringify({ app: 'hashtree-cc', endpoint: 'first',
+      identityStable: true, bothPeersConnected: true, freshTransfer: true, source: 'p2p' }));
+    await pageB.reload();
+    await expectExplicitPeerPair(pageA, pageB, sourcePeerId, cachedProvider);
+    await expectFreshExplicitPeerBlock(pageB, pageA);
+    console.log('BROWSER_PEER_RELOAD', JSON.stringify({ app: 'hashtree-cc', endpoint: 'second',
+      identityStable: true, bothPeersConnected: true, freshTransfer: true, source: 'p2p' }));
     await contextA.close();
 
     const contextC = await newContextWithRelay(browser, renderLoopFailures, relayUrl, []);
