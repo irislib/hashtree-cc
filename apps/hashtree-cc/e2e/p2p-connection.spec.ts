@@ -158,7 +158,7 @@ async function expectFreshExplicitPeerBlock(sender: Page, receiver: Page) {
     const path = '/src/lib/workerClient.ts';
     const client = await (await import(path)).getWorkerClient();
     const text = `reloaded-explicit-peer-${crypto.randomUUID()}`;
-    const stored = await client.putBlock(new TextEncoder().encode(text), { upload: false });
+    const stored = await client.putBlock(new TextEncoder().encode(text), { upload: false, peerShare: true });
     return { hash: stored.hashHex, text };
   });
   expect(await receiver.evaluate(async hash => {
