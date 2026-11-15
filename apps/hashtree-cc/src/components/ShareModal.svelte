@@ -29,6 +29,14 @@
 
   $effect(() => {
     if (!show) return;
+    const root = document.documentElement;
+    const previous = root.style.overflow;
+    root.style.overflow = 'hidden';
+    return () => { root.style.overflow = previous; };
+  });
+
+  $effect(() => {
+    if (!show) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -66,7 +74,7 @@
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
-    class="fixed inset-0 bg-black/70 flex-center z-1000 overflow-auto"
+    class="fixed inset-0 bg-black/70 flex-center z-1000 overflow-auto overscroll-contain"
     onclick={(e) => {
       if (e.target === e.currentTarget) close();
     }}

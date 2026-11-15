@@ -169,6 +169,14 @@
     if (drag?.pointer === e.pointerId) finishDrag();
   }
 
+  // iOS turns a horizontal swipe that drifts downward into a vertical pan and cancels it;
+  // once the swipe is horizontal, keep the touch for the carousel.
+  function holdHorizontalSwipe(node: HTMLElement) {
+    const hold = (e: TouchEvent) => { if (drag?.axis === 'horizontal' && e.cancelable) e.preventDefault(); };
+    node.addEventListener('touchmove', hold, { passive: false });
+    return { destroy: () => node.removeEventListener('touchmove', hold) };
+  }
+
   function cancelOnSecondPointer(e: PointerEvent) {
     if (drag && e.pointerId !== drag.pointer) finishDrag();
   }
@@ -239,6 +247,7 @@
   <div class="relative select-none max-w-lg mx-auto">
     <div
       bind:this={viewportEl}
+      use:holdHorizontalSwipe
       class="overflow-hidden rounded-lg"
       role="group"
       aria-label="Use case slides"

@@ -333,6 +333,12 @@ test('viewer share modal can copy link', async ({ page, context }) => {
   expect(clipboardText).toContain('nhash1');
   expect(clipboardText).toContain('/copy-test.txt');
   expect(new URL(clipboardText).searchParams.get('provider')).toMatch(/^(02|03)[0-9a-f]{64}$/);
+  const pageOverflow = () => page.evaluate(() => getComputedStyle(document.documentElement).overflow);
+  expect(await pageOverflow()).toBe('hidden');
+  await expect(page.getByTestId('share-modal-backdrop')).toHaveCSS('overscroll-behavior', 'contain');
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('share-modal')).toBeHidden();
+  expect(await pageOverflow()).not.toBe('hidden');
 });
 
 test('nhash URL shows image viewer', async ({ page }) => {
