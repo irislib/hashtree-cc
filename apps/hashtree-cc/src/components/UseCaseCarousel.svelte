@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { flushSync, onMount } from 'svelte';
   import SectionHeading from './SectionHeading.svelte';
   const baseUrl = import.meta.env.BASE_URL;
 
@@ -40,137 +41,136 @@
     },
   ];
 
-  let current = $state(0);
+  // The end copies let the track move one slide across either boundary.
+  const trackSlides = [slides[slides.length - 1], ...slides, slides[0]];
+  let position = $state(1);
+  let current = $derived((position - 1 + slides.length) % slides.length);
   let dragOffset = $state(0);
-  let isDragging = $state(false);
-  let autoInterval: ReturnType<typeof setInterval> | undefined;
-  let viewportEl: HTMLDivElement | null = null;
+  let instant = $state(false);
+  let viewportEl: HTMLDivElement;
+  let trackEl: HTMLDivElement;
   let isHovered = false;
   let hasFocusWithin = false;
+  let reducedMotion = false;
+  let autoInterval: ReturnType<typeof setInterval> | undefined;
 
-  const axisLockThresholdPx = 8;
-  const swipeThresholdRatio = 0.25;
-  const minSwipeDistancePx = 24;
-  const velocityThresholdPxPerMs = 0.35;
-
-  let dragStartX = 0;
-  let dragStartY = 0;
-  let dragLastX = 0;
-  let dragLastAt = 0;
-  let velocityX = 0;
-  let dragAxis: 'unknown' | 'horizontal' | 'vertical' = 'unknown';
+  let drag: {
+    pointer: number;
+    startX: number;
+    startY: number;
+    initialOffset: number;
+    axis: 'undecided' | 'horizontal' | 'vertical';
+    lastX: number;
+    lastMoveAt: number;
+    velocity: number;
+  } | undefined;
 
   function startAuto() {
     stopAuto();
-    if (slides.length < 2 || isHovered || hasFocusWithin) return;
-    autoInterval = setInterval(() => {
-      current = (current + 1) % slides.length;
-    }, 5000);
+    if (slides.length < 2 || isHovered || hasFocusWithin || drag || reducedMotion) return;
+    autoInterval = setInterval(next, 5000);
   }
 
   function stopAuto() {
-    if (autoInterval) clearInterval(autoInterval);
+    clearInterval(autoInterval);
     autoInterval = undefined;
   }
 
-  function clearDragState() {
-    dragStartX = 0;
-    dragStartY = 0;
-    dragLastX = 0;
-    dragLastAt = 0;
-    velocityX = 0;
-    dragAxis = 'unknown';
+  // Pin the visible frame, even if a new gesture interrupts a transition.
+  function pinTrack() {
+    const translation = new DOMMatrixReadOnly(getComputedStyle(trackEl).transform).m41;
+    const offset = translation + position * trackEl.getBoundingClientRect().width;
+    const canonical = current + 1;
+    flushSync(() => {
+      instant = true;
+      position = canonical;
+      dragOffset = offset;
+    });
+    trackEl.getBoundingClientRect();
   }
 
-  function beginDrag(x: number, y: number) {
-    isDragging = true;
+  function recenterEndCopy() {
+    if (position === current + 1) return;
+    pinTrack();
+    instant = false;
     dragOffset = 0;
-    clearDragState();
-    dragStartX = x;
-    dragStartY = y;
-    dragLastX = x;
-    dragLastAt = performance.now();
-    stopAuto();
   }
 
-  function finishDrag() {
-    if (!isDragging) return;
-
-    isDragging = false;
-
-    const absDistance = Math.abs(dragOffset);
-    const contentWidth = viewportEl?.clientWidth ?? 1;
-    const swipeThreshold = Math.max(minSwipeDistancePx, contentWidth * swipeThresholdRatio);
-    const isQuickSwipe = Math.abs(velocityX) > velocityThresholdPxPerMs && absDistance > minSwipeDistancePx;
-    const shouldNavigate = dragAxis === 'horizontal' && (absDistance > swipeThreshold || isQuickSwipe);
-
-    let direction: 'prev' | 'next' = dragOffset > 0 ? 'prev' : 'next';
-    if (isQuickSwipe) {
-      direction = velocityX > 0 ? 'prev' : 'next';
-    }
-
+  function step(direction: number) {
+    recenterEndCopy();
+    position += direction;
     dragOffset = 0;
-    clearDragState();
+    instant = false;
+    startAuto();
+  }
 
-    if (shouldNavigate) {
-      if (direction === 'prev') {
-        prev();
-      } else {
-        next();
-      }
-      return;
-    }
+  function prev() { step(-1); }
+  function next() { step(1); }
 
+  function go(i: number) {
+    if (i === (current + 1) % slides.length) return next();
+    if (i === (current - 1 + slides.length) % slides.length) return prev();
+    recenterEndCopy();
+    position = i + 1;
     startAuto();
   }
 
   function onPointerDown(e: PointerEvent) {
-    if (slides.length < 2) return;
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-
-    viewportEl?.setPointerCapture(e.pointerId);
-    beginDrag(e.clientX, e.clientY);
+    if (!e.isPrimary || e.button !== 0 || drag) return;
+    stopAuto();
+    pinTrack();
+    drag = {
+      pointer: e.pointerId, startX: e.clientX, startY: e.clientY,
+      initialOffset: dragOffset, axis: 'undecided', lastX: e.clientX,
+      lastMoveAt: e.timeStamp, velocity: 0,
+    };
+    viewportEl.setPointerCapture(e.pointerId);
   }
 
   function onPointerMove(e: PointerEvent) {
-    if (!isDragging) return;
-
-    const deltaX = e.clientX - dragStartX;
-    const deltaY = e.clientY - dragStartY;
-
-    if (
-      dragAxis === 'unknown' &&
-      (Math.abs(deltaX) > axisLockThresholdPx || Math.abs(deltaY) > axisLockThresholdPx)
-    ) {
-      dragAxis = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
+    if (!drag || e.pointerId !== drag.pointer) return;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+    if (drag.axis === 'undecided' && Math.max(Math.abs(dx), Math.abs(dy)) > 8) {
+      drag.axis = Math.abs(dx) > Math.abs(dy) ? 'horizontal' : 'vertical';
     }
-
-    if (dragAxis !== 'horizontal') return;
-
-    e.preventDefault();
-    dragOffset = deltaX;
-
-    const now = performance.now();
-    const dt = now - dragLastAt;
-    if (dt > 0) {
-      velocityX = (e.clientX - dragLastX) / dt;
+    if (drag.axis !== 'horizontal') return;
+    const elapsed = e.timeStamp - drag.lastMoveAt;
+    if (e.clientX !== drag.lastX) {
+      if (elapsed > 0) drag.velocity = (e.clientX - drag.lastX) / elapsed;
+      drag.lastX = e.clientX;
+      drag.lastMoveAt = e.timeStamp;
     }
-    dragLastX = e.clientX;
-    dragLastAt = now;
+    const width = viewportEl.clientWidth;
+    dragOffset = Math.max(-width, Math.min(width, drag.initialOffset + dx));
+  }
+
+  function finishDrag(direction = 0) {
+    if (!drag) return;
+    const { pointer } = drag;
+    drag = undefined;
+    if (viewportEl.hasPointerCapture(pointer)) viewportEl.releasePointerCapture(pointer);
+    step(direction);
   }
 
   function onPointerUp(e: PointerEvent) {
-    if (viewportEl?.hasPointerCapture(e.pointerId)) {
-      viewportEl.releasePointerCapture(e.pointerId);
-    }
-    finishDrag();
+    if (!drag || e.pointerId !== drag.pointer) return;
+    onPointerMove(e);
+    const distance = e.clientX - drag.startX;
+    const velocity = e.timeStamp - drag.lastMoveAt <= 100 ? drag.velocity : 0;
+    const flick = Math.abs(distance) > 20 && Math.abs(velocity) > 0.3;
+    const farEnough = Math.abs(distance) > viewportEl.clientWidth / 2;
+    const direction = drag.axis === 'horizontal' && (flick || farEnough)
+      ? -Math.sign(flick ? velocity : distance) : 0;
+    finishDrag(direction);
   }
 
-  function onPointerCancel(e: PointerEvent) {
-    if (viewportEl?.hasPointerCapture(e.pointerId)) {
-      viewportEl.releasePointerCapture(e.pointerId);
-    }
-    finishDrag();
+  function cancelPointer(e: PointerEvent) {
+    if (drag?.pointer === e.pointerId) finishDrag();
+  }
+
+  function cancelOnSecondPointer(e: PointerEvent) {
+    if (drag && e.pointerId !== drag.pointer) finishDrag();
   }
 
   function onMouseEnter() {
@@ -202,26 +202,22 @@
     startAuto();
   }
 
-  function go(i: number) {
-    current = i;
-    startAuto();
-  }
-
-  function prev() {
-    go((current - 1 + slides.length) % slides.length);
-  }
-
-  function next() {
-    go((current + 1) % slides.length);
-  }
-
-  $effect(() => {
-    startAuto();
+  onMount(() => {
+    const preference = matchMedia('(prefers-reduced-motion: reduce)');
+    function updateMotion() {
+      reducedMotion = preference.matches;
+      startAuto();
+    }
+    updateMotion();
+    preference.addEventListener('change', updateMotion);
     return () => {
       stopAuto();
+      preference.removeEventListener('change', updateMotion);
     };
   });
 </script>
+
+<svelte:window onpointerdowncapture={cancelOnSecondPointer} />
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
 <div
@@ -250,17 +246,21 @@
       onpointerdown={onPointerDown}
       onpointermove={onPointerMove}
       onpointerup={onPointerUp}
-      onpointercancel={onPointerCancel}
+      onpointercancel={cancelPointer}
+      onlostpointercapture={cancelPointer}
     >
       <div
-        class="flex"
-        style="transform: translateX(calc(-{current * 100}% + {dragOffset}px)); transition: {isDragging ? 'none' : 'transform 400ms ease-in-out'};"
+        bind:this={trackEl}
+        class="track flex"
+        class:instant
+        style:transform={`translateX(calc(-${position * 100}% + ${dragOffset}px))`}
+        ontransitionend={(e) => { if (e.target === trackEl && e.propertyName === 'transform') recenterEndCopy(); }}
       >
-        {#each slides as slide}
-          <div class="w-full shrink-0">
+        {#each trackSlides as slide, i}
+          <div class="w-full shrink-0" aria-hidden={i !== current + 1}>
             <img
               src={slide.src}
-              alt={slide.title}
+              alt={i === 0 || i === trackSlides.length - 1 ? '' : slide.title}
               class="w-full block"
               draggable="false"
             />
@@ -309,7 +309,16 @@
         class="w-2 h-2 rounded-full transition-colors {i === current ? 'bg-accent' : 'bg-surface-3 hover:bg-text-3'}"
         onclick={() => go(i)}
         aria-label="Slide {i + 1}"
+        aria-current={i === current ? 'true' : undefined}
       ></button>
     {/each}
   </div>
 </div>
+
+<style>
+  .track { transition: transform 300ms ease-out; }
+  .track.instant { transition: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .track { transition: none; }
+  }
+</style>

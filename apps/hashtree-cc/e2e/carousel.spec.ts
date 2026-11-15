@@ -65,6 +65,29 @@ test.describe('Use case carousel', () => {
     await expect(page.getByText(SECOND_SLIDE, { exact: true })).toBeVisible({ timeout: 1500 });
   });
 
+  test('a short mouse flick navigates once and keeps its caption link', async ({ page }) => {
+    const region = page.getByRole('region', { name: 'Use case carousel' });
+    const viewport = region.getByRole('group', { name: 'Use case slides' });
+    await viewport.scrollIntoViewIfNeeded();
+    const box = await viewport.boundingBox();
+    if (!box) throw new Error('Carousel viewport is missing');
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 4;
+    const session = await page.context().newCDPSession(page);
+    const start = Date.now() / 1000;
+    await session.send('Input.dispatchMouseEvent', {
+      type: 'mousePressed', x, y, button: 'left', buttons: 1, timestamp: start, clickCount: 1,
+    });
+    await session.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved', x: x - 22, y, buttons: 1, timestamp: start + 0.016,
+    });
+    await session.send('Input.dispatchMouseEvent', {
+      type: 'mouseReleased', x: x - 22, y, button: 'left', timestamp: start + 0.025, clickCount: 1,
+    });
+    await expect(region.getByRole('link', { name: 'Iris Audio' })).toHaveAttribute('href', 'https://audio.iris.to');
+    await session.detach();
+  });
+
   test('arrow keys navigate when carousel focused', async ({ page }) => {
     const carousel = page.getByRole('region', { name: 'Use case carousel' });
     await carousel.click();
