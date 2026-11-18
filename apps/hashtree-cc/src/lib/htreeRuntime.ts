@@ -7,14 +7,21 @@ import { settingsStore } from './settings';
 
 type ImmutableMediaUrlOptions = Omit<HtreeRuntimeMediaUrlOptions, 'clientScoped'>;
 
+const appId = 'hashtree-cc';
 const htreeRuntime = createHtreeRuntime({
-  appId: 'hashtree-cc',
+  appId,
   relays: () => settingsStore.getState().network.relays,
   blossomServers: () => settingsStore.getState().network.blossomServers,
 });
 
-export function getHtreeRuntime() {
-  return htreeRuntime;
+// Private shares can exist only in browser storage. Keep their URLs and media
+// port registration on the page's own service worker, including bridge origins.
+const browserMediaRuntime = createHtreeRuntime({ appId, windowLike: {} });
+
+export function getMediaRuntime() {
+  return typeof navigator !== 'undefined' && 'serviceWorker' in navigator
+    ? browserMediaRuntime
+    : htreeRuntime;
 }
 
 export function getRuntimeWorkerConfig(
@@ -32,7 +39,7 @@ export function buildImmutableMediaUrl(
   path: string,
   options: ImmutableMediaUrlOptions = {},
 ): string {
-  return htreeRuntime.urls.media(
+  return getMediaRuntime().urls.media(
     {
       kind: 'immutable',
       nhash,

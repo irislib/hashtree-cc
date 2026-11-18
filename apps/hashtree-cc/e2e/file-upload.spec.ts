@@ -97,31 +97,30 @@ function mockBlossom(page: import('@playwright/test').Page, expectedHash: string
   ]);
 }
 
-test('file upload navigates to viewer with nhash URL', async ({ page }) => {
-  const fileContent = 'hello hashtree test file';
-  const expectedHash = createHash('sha256').update(fileContent).digest('hex');
+for (const [name, entry] of [
+  ['file upload navigates to viewer with nhash URL', '/'],
+  ['native child file upload opens the private file in its browser worker', '/?htree_canonical=htree%3A%2F%2Fquick-share'],
+]) {
+  test(name, async ({ page }) => {
+    const fileContent = 'hello hashtree test file';
+    const expectedHash = createHash('sha256').update(fileContent).digest('hex');
 
-  await mockBlossom(page, expectedHash, fileContent);
-  await page.goto('/');
+    await mockBlossom(page, expectedHash, fileContent);
+    await page.goto(entry);
 
-  await page.getByTestId('file-input').setInputFiles({
-    name: 'test.txt',
-    mimeType: 'text/plain',
-    buffer: Buffer.from(fileContent),
+    await page.getByTestId('file-input').setInputFiles({
+      name: 'test.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.from(fileContent),
+    });
+
+    await expect(page.getByTestId('file-viewer')).toBeVisible();
+    const nhash = new URL(page.url()).hash.split('/')[1];
+    expect(encryptionMode(nhashDecode(nhash).key!)).toBe('chk-v1');
+    expect(page.url()).toContain('/test.txt');
+    await expect(page.getByTestId('viewer-text')).toHaveText(fileContent);
   });
-
-  // Should navigate directly to viewer after upload
-  await expect(page.getByTestId('file-viewer')).toBeVisible({ timeout: 10000 });
-
-  // URL has nhash and filename
-  const nhash = new URL(page.url()).hash.split('/')[1];
-  expect(encryptionMode(nhashDecode(nhash).key!)).toBe('chk-v1');
-  expect(page.url()).toContain('/test.txt');
-
-  // Text content is shown
-  await expect(page.getByTestId('viewer-text')).toBeVisible();
-  await expect(page.getByTestId('viewer-text')).toContainText('hello hashtree test file');
-});
+}
 
 test('service worker preserves suffix byte ranges for immutable /htree files', async ({ page }) => {
   const fileName = 'range.bin';
