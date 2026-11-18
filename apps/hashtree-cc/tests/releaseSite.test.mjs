@@ -1,4 +1,5 @@
-import test from 'node:test';
+import { afterEach, beforeEach, test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 
 import { createReleasePlan, parseArgs, parsePublishOutput, runRelease } from '../scripts/release-site.mjs';
@@ -6,6 +7,20 @@ import {
   configFor as workerAssetsConfigFor,
   parseArgs as parseWorkerAssetsArgs,
 } from '../scripts/deploy-worker-assets.mjs';
+
+const gatePath = fileURLToPath(import.meta.url);
+const originalNativeGate = process.env.IRIS_NATIVE_RELEASE_GATE;
+const originalHtreeBin = process.env.HTREE_BIN;
+beforeEach(() => {
+  process.env.IRIS_NATIVE_RELEASE_GATE = gatePath;
+  process.env.HTREE_BIN = 'htree';
+});
+afterEach(() => {
+  if (originalNativeGate === undefined) delete process.env.IRIS_NATIVE_RELEASE_GATE;
+  else process.env.IRIS_NATIVE_RELEASE_GATE = originalNativeGate;
+  if (originalHtreeBin === undefined) delete process.env.HTREE_BIN;
+  else process.env.HTREE_BIN = originalHtreeBin;
+});
 
 test('uses the built-in Worker default for hashtree.cc', () => {
   const parsed = parseArgs([]);
@@ -35,6 +50,10 @@ test('builds a Worker release plan in build-test-publish-deploy order', () => {
     workerCompatibilityDate: '2026-03-19',
   });
 
+  assert.deepEqual(plan.steps.find(step => step.id === 'publish').command, [
+    process.execPath, gatePath, '--dist', plan.distDir,
+    '--tree', 'hashtree-cc-site', '--htree', 'htree',
+  ]);
   assert.deepEqual(
     plan.steps.map((step) => step.id),
     ['build', 'test-1', 'test-2', 'test-3', 'publish', 'deploy'],
@@ -115,7 +134,7 @@ test('generates a Worker Static Assets config that runs the redirect Worker firs
   });
 });
 
-test('runs hashtree publish and Worker deploy in parallel after tests', async () => {
+test('runs the native release gate before Worker deploy', async () => {
   let activeReleaseSteps = 0;
   let maxActiveReleaseSteps = 0;
   const calls = [];
@@ -150,7 +169,7 @@ test('runs hashtree publish and Worker deploy in parallel after tests', async ()
   );
 
   assert.deepEqual(calls, ['build', 'test-1', 'test-2', 'test-3', 'publish', 'deploy']);
-  assert.equal(maxActiveReleaseSteps, 2);
+  assert.equal(maxActiveReleaseSteps, 1);
 });
 
 test('returns parsed hashtree publish data and Worker target on success', async () => {

@@ -6,6 +6,10 @@ const lockfile = await readFile(new URL('pnpm-lock.yaml', root), 'utf8');
 const workspace = await readFile(new URL('pnpm-workspace.yaml', root), 'utf8');
 
 const releases = {
+  "@iris/release-tools": {
+    "url": "https://github.com/mmalmi/iris-kit/releases/download/runtime-v0.2.12/iris-release-tools-0.1.2.tgz",
+    "integrity": "sha512-ZytyQLbDUYz/IcQ2rvUZZeFvT7FqwhRB3brZtuMwH7ILP/Jvui+ldDnKR8dNxxmIr02+PPyuv+VWKlRyaXCMbg=="
+  },
   "@fips/browser": {
     "url": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.62/fips-browser-0.0.22.tgz",
     "integrity": "sha512-/bCzxQoLHE7sOaHKj+beKGZNej6ja5nifG1+enn8PKFqm7KfjmhzZp8RqIgafIkT6MRoQVuIOzv8CMM9WuOmKQ=="
@@ -85,6 +89,10 @@ for (const name of [
   if (manifest.dependencies?.[name] !== releases[name].url) {
     throw new Error(`${name} must use immutable release ${releases[name].url}`);
   }
+}
+
+if (manifest.devDependencies?.['@iris/release-tools'] !== releases['@iris/release-tools'].url) {
+  throw new Error('@iris/release-tools must use its immutable release');
 }
 
 for (const [name, specifier] of Object.entries(manifest.dependencies ?? {})) {

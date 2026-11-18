@@ -22,7 +22,7 @@
     "test:release": "pnpm run verify:dependency-lock && node --test tests/releaseSite.test.mjs tests/hashtreePaths.test.mjs tests/httpsStaticAssetsWorker.test.mjs",
     "test:portable": "pnpm run build && node --test tests/portable-build.test.mjs && node ./scripts/portable-smoke.mjs",
     "smoke:portable": "node ./scripts/portable-smoke.mjs",
-    "publish:portable": "pnpm run build && node --test tests/portable-build.test.mjs && node ./scripts/portable-smoke.mjs && node ./scripts/publish-portable.mjs",
+    "publish:portable": "node ./scripts/release-site.mjs --skip-cloudflare",
     "release:site": "node ./scripts/release-site.mjs"
   },
   "dependencies": {
@@ -39,6 +39,7 @@
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
+    "@iris/release-tools": "https://github.com/mmalmi/iris-kit/releases/download/runtime-v0.2.12/iris-release-tools-0.1.2.tgz",
     "@iconify-json/lucide": "^1.2.117",
     "@playwright/test": "^1.61.1",
     "@sveltejs/vite-plugin-svelte": "^5.1.1",

@@ -1,7 +1,12 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawn } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import {
+  cloneValues,
+  createDefaultRunner,
+  createReleasePlan as createSharedReleasePlan,
+  runReleasePlan,
+  usesBuiltInWorker,
+} from '@iris/release-tools';
 import { resolveHtreeCommand } from './hashtreePaths.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -9,11 +14,15 @@ const __dirname = path.dirname(__filename);
 const appDir = path.resolve(__dirname, '..');
 const defaultWorkerCompatibilityDate = '2026-03-19';
 const wranglerVersion = '4';
+const defaultRunner = createDefaultRunner();
+
+export { parsePublishOutput } from '@iris/release-tools';
 
 export const releaseProfile = {
   appName: 'hashtree.cc',
   distDir: 'dist',
   treeName: 'hashtree-cc-site',
+  nativeReleaseGate: true,
   defaultWorkerName: 'hashtree-cc',
   defaultRoutes: ['hashtree.cc/*'],
   workerScript: 'scripts/https-static-assets-worker.mjs',
@@ -26,51 +35,6 @@ export const releaseProfile = {
     ['node', './scripts/portable-smoke.mjs'],
   ],
 };
-
-function cloneValues(values) {
-  return values ? [...values] : [];
-}
-
-function usesBuiltInWorker(workerName) {
-  return Boolean(releaseProfile.defaultWorkerName && workerName === releaseProfile.defaultWorkerName);
-}
-
-function wranglerPagesCommand(...args) {
-  return ['npx', `wrangler@${wranglerVersion}`, ...args];
-}
-
-function wranglerWorkerAssetsCommand(...args) {
-  return ['npx', `wrangler@${wranglerVersion}`, 'deploy', ...args];
-}
-
-function workerAssetsDeployCommand(options) {
-  if (releaseProfile.workerScript) {
-    return [
-      'node',
-      './scripts/deploy-worker-assets.mjs',
-      '--script',
-      releaseProfile.workerScript,
-      '--assets',
-      releaseProfile.distDir,
-      '--name',
-      options.workerName,
-      '--compatibility-date',
-      options.workerCompatibilityDate,
-      '--wrangler-version',
-      wranglerVersion,
-    ];
-  }
-
-  return wranglerWorkerAssetsCommand(
-    '--assets',
-    releaseProfile.distDir,
-    '--name',
-    options.workerName,
-    '--compatibility-date',
-    options.workerCompatibilityDate,
-    '--keep-vars',
-  );
-}
 
 export function parseArgs(argv, env = process.env) {
   const args = [...argv].filter((arg, index) => !(arg === '--' && index === 0));
@@ -146,10 +110,10 @@ export function parseArgs(argv, env = process.env) {
   const resolvedWorkerName = pagesOnly
     ? undefined
     : workerName ?? env[releaseProfile.workerNameEnv] ?? releaseProfile.defaultWorkerName;
-  const defaultRoutes = usesBuiltInWorker(resolvedWorkerName)
+  const defaultRoutes = usesBuiltInWorker(releaseProfile, resolvedWorkerName)
     ? cloneValues(releaseProfile.defaultRoutes)
     : [];
-  const defaultDomains = usesBuiltInWorker(resolvedWorkerName)
+  const defaultDomains = usesBuiltInWorker(releaseProfile, resolvedWorkerName)
     ? cloneValues(releaseProfile.defaultDomains)
     : [];
 
@@ -169,212 +133,24 @@ export function parseArgs(argv, env = process.env) {
 }
 
 export function createReleasePlan(options) {
-  if (options.workerName && options.branch) {
-    throw new Error('--branch is only supported for Pages deployments');
-  }
-  if (!options.skipCloudflare && !options.workerName && !options.pagesProject) {
-    throw new Error(
-      `Missing Cloudflare target. Pass --worker-name, --pages-project, or set ${releaseProfile.workerNameEnv} / ${releaseProfile.pagesProjectEnv}.`,
-    );
-  }
-
-  const distDir = path.join(appDir, releaseProfile.distDir);
-  const steps = [
-    {
-      id: 'build',
-      label: `Build ${releaseProfile.appName}`,
-      command: releaseProfile.buildCommand,
-      cwd: appDir,
-    },
-    ...releaseProfile.testCommands.map((command, index) => ({
-      id: `test-${index + 1}`,
-      label: `Test ${releaseProfile.appName} (${index + 1}/${releaseProfile.testCommands.length})`,
-      command,
-      cwd: appDir,
-    })),
-    {
-      id: 'publish',
-      label: `Publish ${releaseProfile.appName} to hashtree`,
-      command: resolveHtreeCommand('add', '.', '--publish', options.treeName),
-      cwd: distDir,
-    },
-  ];
-
-  if (!options.skipCloudflare) {
-    const deployCommand = options.workerName
-      ? workerAssetsDeployCommand(options)
-      : wranglerPagesCommand(
-          'pages',
-          'deploy',
-          releaseProfile.distDir,
-          '--project-name',
-          options.pagesProject,
-        );
-    if (options.workerName) {
-      for (const route of options.routes ?? []) {
-        deployCommand.push('--route', route);
-      }
-      for (const domain of options.domains ?? []) {
-        deployCommand.push('--domain', domain);
-      }
-    }
-    if (options.pagesProject && options.branch) {
-      deployCommand.push('--branch', options.branch);
-    }
-    steps.push({
-      id: 'deploy',
-      label: options.workerName
-        ? `Deploy ${releaseProfile.appName} to Cloudflare Worker`
-        : `Deploy ${releaseProfile.appName} to Cloudflare Pages`,
-      command: deployCommand,
-      cwd: appDir,
-    });
-  }
-
-  return { profile: releaseProfile, distDir, steps };
-}
-
-function defaultRunner(step) {
-  const [command, ...args] = step.command;
-  console.log(`\n==> ${step.label}`);
-  console.log(`$ ${[command, ...args].join(' ')}`);
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args, {
-      cwd: step.cwd,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-    let stdout = '';
-    let stderr = '';
-
-    child.stdout?.setEncoding('utf8');
-    child.stdout?.on('data', (chunk) => {
-      stdout += chunk;
-      process.stdout.write(chunk);
-    });
-
-    child.stderr?.setEncoding('utf8');
-    child.stderr?.on('data', (chunk) => {
-      stderr += chunk;
-      process.stderr.write(chunk);
-    });
-
-    child.on('error', reject);
-    child.on('close', (code, signal) => {
-      if (signal) {
-        const signalMessage = `Process exited with signal ${signal}\n`;
-        stderr += signalMessage;
-        process.stderr.write(signalMessage);
-      }
-      resolve({
-        status: code ?? 1,
-        stdout,
-        stderr,
-      });
-    });
+  return createSharedReleasePlan({
+    appDir,
+    options,
+    profile: releaseProfile,
+    resolveHtreeCommand,
+    wranglerVersion,
   });
 }
 
-function ensureDistExists(distDir, buildOutputExists = existsSync) {
-  if (!buildOutputExists(distDir)) {
-    throw new Error(`Build output directory not found: ${distDir}`);
-  }
-}
-
-export function parsePublishOutput(output) {
-  const nhashMatch = output.match(/nhash1[ac-hj-np-z02-9]+/i);
-  if (!nhashMatch) {
-    throw new Error('Publish succeeded but no nhash was found in htree output');
-  }
-
-  const publishedMatch = output.match(/^\s*published:\s+(\S+)\s*$/im);
-  if (!publishedMatch) {
-    throw new Error('Publish succeeded but no mutable ref was found in htree output');
-  }
-
-  return {
-    nhash: nhashMatch[0],
-    publishedRef: publishedMatch[1],
-  };
-}
-
-function parsePagesOutput(output) {
-  const pagesUrlMatch = output.match(/https:\/\/[^\s]+\.pages\.dev(?:\/[^\s]*)?/i);
-  return pagesUrlMatch ? pagesUrlMatch[0] : null;
-}
-
-function isReleaseStep(step) {
-  return step.id === 'publish' || step.id === 'deploy';
-}
-
-function assertStepSucceeded(step, result) {
-  if (result.status !== 0) {
-    throw new Error(`${step.label} failed with exit code ${result.status}`);
-  }
-}
-
 export async function runRelease(options, runner = defaultRunner, hooks = {}) {
-  const plan = createReleasePlan(options);
-  const buildOutputExists = hooks.buildOutputExists ?? existsSync;
-
-  if (options.dryRun) {
-    return {
-      dryRun: true,
-      profile: plan.profile,
-      steps: plan.steps,
-    };
-  }
-
-  let publishOutput = '';
-  let pagesOutput = '';
-  const prereleaseSteps = plan.steps.filter((step) => !isReleaseStep(step));
-  const releaseSteps = plan.steps.filter(isReleaseStep);
-
-  for (const step of prereleaseSteps) {
-    const result = await runner(step);
-    assertStepSucceeded(step, result);
-    if (step.id === 'build') {
-      ensureDistExists(plan.distDir, buildOutputExists);
-    }
-  }
-
-  const releaseResults = await Promise.allSettled(
-    releaseSteps.map((step) => Promise.resolve().then(() => runner(step))),
-  );
-
-  for (const [index, execution] of releaseResults.entries()) {
-    const step = releaseSteps[index];
-    if (execution.status === 'rejected') {
-      throw execution.reason;
-    }
-    const result = execution.value;
-    assertStepSucceeded(step, result);
-    if (step.id === 'publish') {
-      publishOutput = `${result.stdout}\n${result.stderr}`;
-    }
-    if (step.id === 'deploy') {
-      pagesOutput = `${result.stdout}\n${result.stderr}`;
-    }
-  }
-
-  const publish = parsePublishOutput(publishOutput);
-  return {
-    profile: plan.profile,
-    treeName: options.treeName,
-    publish,
-    pagesUrl: pagesOutput ? parsePagesOutput(pagesOutput) : null,
-    pagesProject:
-      options.skipCloudflare || options.workerName ? null : options.pagesProject ?? null,
-    workerName: options.skipCloudflare ? null : options.workerName ?? null,
-    routes: options.skipCloudflare || !options.workerName ? [] : options.routes ?? [],
-    domains: options.skipCloudflare || !options.workerName ? [] : options.domains ?? [],
-  };
+  return runReleasePlan(options, createReleasePlan(options), runner, hooks);
 }
 
 export function usage() {
   return `Usage: node ./scripts/release-site.mjs [options]
 
-Build once, test the built output, then publish to hashtree and deploy that same
-directory to Cloudflare Workers Static Assets or Cloudflare Pages in parallel.
+Build and test once, verify and promote the build through native Iris Drive,
+then deploy the same output to the configured Cloudflare target.
 
 Options:
   --worker-name <name>    Cloudflare Worker service name for static assets
@@ -390,6 +166,7 @@ Options:
   --dry-run               print planned steps without running them
 
 Environment:
+  IRIS_NATIVE_RELEASE_GATE  Absolute path to the approved Iris Sites release runner
   ${releaseProfile.workerNameEnv}   Default Worker name for hashtree.cc
   ${releaseProfile.pagesProjectEnv}   Default Pages project for hashtree.cc
   CF_WORKER_COMPATIBILITY_DATE   Default compatibility date for Worker deployments
