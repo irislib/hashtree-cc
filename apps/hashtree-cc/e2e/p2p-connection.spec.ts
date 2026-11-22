@@ -145,7 +145,7 @@ async function expectExplicitPeerPair(first: Page, second: Page, firstId: string
   expect(firstId).not.toBe(secondId);
   const state = (page: Page, otherId: string) => page.evaluate(other => {
     const current = window.__hashtreeCcP2P;
-    return { id: current?.peerId ?? '', connected: current?.peers.some(peer => peer.peerId === other && peer.connected) ?? false };
+    return { id: current?.peerId ?? '', connected: current?.peers.filter(peer => peer.pubkey === other.slice(2) && peer.connected).length === 1 };
   }, otherId);
   await Promise.all([
     expect.poll(() => state(first, secondId), { timeout: 60_000 }).toEqual({ id: firstId, connected: true }),

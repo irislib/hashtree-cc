@@ -8,6 +8,7 @@ import {
 import { IndexedDbIdentityStore } from '@fips/browser';
 import {
   npubFromHex,
+  transportAddressKey,
   type FipsIdentity,
   type PeerEvent,
   type SessionEvent,
@@ -126,6 +127,7 @@ let statsTimer: ReturnType<typeof setInterval> | null = null;
 let currentBlossomBandwidth: BlossomBandwidthState = DEFAULT_BLOSSOM_BANDWIDTH;
 let activeBlobRoutes: Array<{ peerId: string; htl: number }> = [];
 const peerStats = new Map<string, P2PPeerState>();
+const activePeerPaths = new Map<string, Set<string>>();
 let providerUnsubscribes: Array<() => void> = [];
 
 declare global {
@@ -148,13 +150,17 @@ function compressedPeerIdToXOnly(peerId: string): string {
   return /^(02|03)[0-9a-f]{64}$/.test(normalized) ? normalized.slice(2) : normalized;
 }
 
-function ensurePeer(peerId: string): P2PPeerState {
-  const normalized = peerId.trim().toLowerCase();
-  const existing = peerStats.get(normalized);
+function remoteIdentity(event: (PeerEvent | SessionEvent) & { peerId?: string }): string | undefined {
+  const pubkey = event.peerId ?? compressedPeerIdToXOnly(event.remotePubkey);
+  return /^[0-9a-f]{64}$/.test(pubkey) ? pubkey : undefined;
+}
+
+function ensurePeer(pubkey: string, route: string): P2PPeerState {
+  const existing = peerStats.get(pubkey);
   if (existing) return existing;
   const created: P2PPeerState = {
-    peerId: normalized,
-    pubkey: compressedPeerIdToXOnly(normalized),
+    peerId: route,
+    pubkey,
     connected: false,
     pool: 'other',
     bytesSent: 0,
@@ -169,7 +175,7 @@ function ensurePeer(peerId: string): P2PPeerState {
     sessionsEstablished: 0,
     lastStateAt: Date.now(),
   };
-  peerStats.set(normalized, created);
+  peerStats.set(pubkey, created);
   return created;
 }
 
@@ -255,19 +261,33 @@ async function stopProvider(): Promise<void> {
   provider = null;
   activeBlobRoutes = [];
   peerStats.clear();
+  activePeerPaths.clear();
   await active?.stop().catch(() => undefined);
 }
 
 function handlePeerEvent(event: PeerEvent): void {
-  const peer = ensurePeer(event.remotePubkey);
-  peer.connected = event.state === 'connected';
+  const pubkey = remoteIdentity(event);
+  if (!pubkey) return;
+  const peer = ensurePeer(pubkey, event.remotePubkey);
+  const path = transportAddressKey(event.remoteAddr);
+  const paths = activePeerPaths.get(pubkey) ?? new Set<string>();
+  if (event.state === 'connected') {
+    paths.add(path);
+    activePeerPaths.set(pubkey, paths);
+  } else {
+    paths.delete(path);
+    if (!paths.size) activePeerPaths.delete(pubkey);
+  }
+  peer.connected = paths.size > 0;
   peer.lastStateAt = Date.now();
   updateDebugState();
 }
 
 function handleSessionEvent(event: SessionEvent): void {
   if (event.state !== 'established') return;
-  const peer = ensurePeer(event.remotePubkey);
+  const pubkey = remoteIdentity(event);
+  if (!pubkey) return;
+  const peer = ensurePeer(pubkey, event.remotePubkey);
   peer.sessionsEstablished += 1;
   updateDebugState();
 }
@@ -349,7 +369,9 @@ export async function waitForExplicitProviderRoute(nhash: string): Promise<void>
   if ((await worker.hasBlob(hashHex, { sourceIds: ['idb'] })).available) return;
   await initP2P();
   const route = activeBlobRoutes[0];
-  if (!route || (peerStats.get(route.peerId)?.sessionsEstablished ?? 0) > 0) return;
+  if (!route) return;
+  const pubkey = compressedPeerIdToXOnly(route.peerId);
+  if ((peerStats.get(pubkey)?.sessionsEstablished ?? 0) > 0) return;
   const active = provider;
   if (!active) throw new Error('Shared Hashtree provider is unavailable');
 
@@ -369,10 +391,10 @@ export async function waitForExplicitProviderRoute(nhash: string): Promise<void>
     }, PROVIDER_CONNECT_TIMEOUT_MS);
     unsubscribe = active.node.on('session', (event) => {
       const session = event as SessionEvent;
-      if (session.remotePubkey === route.peerId && session.state === 'established') finish();
+      if (session.state === 'established' && remoteIdentity(session) === pubkey) finish();
     });
     if (settled) unsubscribe();
-    else if ((peerStats.get(route.peerId)?.sessionsEstablished ?? 0) > 0) finish();
+    else if ((peerStats.get(pubkey)?.sessionsEstablished ?? 0) > 0) finish();
     else {
       // The shared URL names this peer even when its discovery announcement predates a reload.
       // Keep listening for a routed session if the direct connection is unavailable.
