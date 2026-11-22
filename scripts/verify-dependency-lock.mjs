@@ -19,8 +19,8 @@ const releases = {
     "integrity": "sha512-UW0PHboZgifo806XxYYjNGgPsKYDMA59YQSvFD0j1k5lhAofX1Yfx+kH38mTYWeTNJQKSr7cMaWqM1Ue2pSV8g=="
   },
   "@fips/tcp": {
-    "url": "https://github.com/mmalmi/fips-tcp/releases/download/fips-tcp-ts-v0.2.5/fips-tcp-0.2.5.tgz",
-    "integrity": "sha512-HxpRbTZ6sockyD/SonLhPow+vjb0R0bGY57fOf27k2D5gVfyAGmvMV6TvmF1NzxMJLmEgB1uZ5BHT3pKM86jfw=="
+    "url": "https://github.com/mmalmi/fips-tcp/releases/download/fips-tcp-ts-v0.2.6/fips-tcp-0.2.6.tgz",
+    "integrity": "sha512-lXQHNwTZEyXGYWqzRlNyKpb2UgNWJOon6HljbY1F1Ey49Q9IoE/kdF84gaTkrCpMPS8M/A6y5FTaFPOLl60+bw=="
   },
   "@fips/transport-webrtc": {
     "url": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.63/fips-transport-webrtc-0.0.62.tgz",
@@ -67,8 +67,8 @@ const releases = {
     "integrity": "sha512-viUPl2JUtrfJENEWZPvaTtT5x73Pvj5EmHn7qjsTP5T01uOg0tDm7xJww3cf6x23LILi6drOh97ss0WWYq/KVA=="
   },
   "nostr-pubsub": {
-    "url": "https://github.com/mmalmi/nostr-pubsub/releases/download/nostr-pubsub-ts-v0.5.39/nostr-pubsub-0.5.39.tgz",
-    "integrity": "sha512-KceAz5NAizGxT6I6uD7+GYA4Dca8y0IqBZ9wF58IqHHE4p/m6pd24CEa9r32y3JP4MZspHz0yJwSRzpn8fgZAA=="
+    "url": "https://github.com/mmalmi/nostr-pubsub/releases/download/nostr-pubsub-ts-v0.5.40/nostr-pubsub-0.5.40.tgz",
+    "integrity": "sha512-nDvUCBEXacZRzM9lAEbK9Ofu03NQGAzuM4+IklXrUsvxJy8qv7vIwEDac9PbXxSjxwFuaXXwWJWYe6r4ltpO2g=="
   },
   "nostr-social-graph": {
     "url": "https://github.com/mmalmi/nostr-social-graph/releases/download/v4.1.0/nostr-social-graph-4.1.0.tgz",
