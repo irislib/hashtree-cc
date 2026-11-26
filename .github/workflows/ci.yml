@@ -8,47 +8,32 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    container:
+      # Playwright 1.61.1 / Ubuntu Noble, Linux amd64. Includes Chromium and OS libraries.
+      image: mcr.microsoft.com/playwright@sha256:cf0daee9b994042e011bc29f20cdff1a9f682a039b43fcd738f7d8a9d3bcd9d6
+      options: --cpus 2 --memory 6g --memory-swap 6g
     permissions:
       contents: read
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Qualify the website with pinned tools
+        run: bash scripts/ci-qualify.sh
+
+      - name: Retain candidate and qualification evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
         with:
-          package_json_file: package.json
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright browsers
-        run: pnpm --dir apps/hashtree-cc exec playwright install chromium --with-deps
-
-      - name: Build app
-        run: pnpm build
-
-      - name: Run release tests
-        run: pnpm test:release
-
-      - name: Run portable tests
-        run: pnpm test:portable
-
-      - name: Run Playwright tests
-        run: pnpm test
-
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-report
-          path: apps/hashtree-cc/playwright-report/
-          retention-days: 7
+          name: website-${{ github.sha }}
+          path: |
+            apps/hashtree-cc/dist/
+            apps/hashtree-cc/playwright-report/
+            apps/hashtree-cc/test-results/
+            ci-evidence/
+          retention-days: 30
