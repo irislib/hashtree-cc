@@ -19,10 +19,10 @@ PY
 check_capacity 24
 tool_dir="$RUNNER_TEMP/hashtree-cc-tools"
 mkdir -p "$tool_dir/node" "$tool_dir/pnpm"
-curl --fail --location --max-time 120 --output "$tool_dir/node.tar.xz" \
-  https://nodejs.org/dist/v22.23.4/node-v22.23.4-linux-x64.tar.xz
-echo "1805bcd35e6815559bd2eb97db438d3fdb0eb3a5e6a977b7c1badca76337e9ce  $tool_dir/node.tar.xz" | sha256sum --check --strict
-tar -xJf "$tool_dir/node.tar.xz" --strip-components=1 -C "$tool_dir/node"
+curl --fail --location --max-time 120 --output "$tool_dir/node.tar.gz" \
+  https://nodejs.org/dist/v22.23.4/node-v22.23.4-linux-x64.tar.gz
+echo "b8492284c76a54baf58d61668dd0e41ee0fc98adabf9503d30f05d08f55b4406  $tool_dir/node.tar.gz" | sha256sum --check --strict
+tar -xzf "$tool_dir/node.tar.gz" --strip-components=1 -C "$tool_dir/node"
 echo "94efd062ed066c1a0b332e18249859c905e920eeada5df55d24c99b919629a90  $tool_dir/node/bin/node" | sha256sum --check --strict
 curl --fail --location --max-time 120 --output "$tool_dir/pnpm.tgz" \
   https://registry.npmjs.org/pnpm/-/pnpm-10.23.0.tgz
