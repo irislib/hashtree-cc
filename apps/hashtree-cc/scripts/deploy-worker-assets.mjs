@@ -2,6 +2,7 @@ import { rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
+import { verifiedWranglerCommand, wranglerVersion } from './verify-wrangler-tool.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,7 +12,7 @@ export function parseArgs(argv) {
   const options = {
     routes: [],
     domains: [],
-    wranglerVersion: '4',
+    wranglerVersion,
   };
 
   const args = [...argv];
@@ -54,6 +55,11 @@ export function parseArgs(argv) {
     }
   }
 
+  // Older release-tools profiles pass the major version; it never triggers a download.
+  if (!['4', wranglerVersion].includes(options.wranglerVersion)) {
+    throw new Error(`Use the verified local Wrangler ${wranglerVersion} closure`);
+  }
+
   return options;
 }
 
@@ -90,6 +96,7 @@ function run(command, args, cwd) {
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
+  const [executable, ...toolArgs] = await verifiedWranglerCommand();
   const configPath = path.join(
     appDir,
     `.wrangler-assets-${process.pid}-${Date.now()}.json`,
@@ -110,7 +117,7 @@ async function main() {
       command.push('--domain', domain);
     }
 
-    const status = await run('npx', [`wrangler@${options.wranglerVersion}`, ...command], appDir);
+    const status = await run(executable, [...toolArgs, ...command], appDir);
     if (status !== 0) {
       process.exitCode = status;
     }

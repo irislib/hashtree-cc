@@ -213,3 +213,4 @@ test('parses htree publish output defensively', () => {
     /Publish succeeded but no nhash was found in htree output/,
   );
 });
+import './deployTool.test.mjs';
