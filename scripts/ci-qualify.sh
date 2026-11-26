@@ -31,6 +31,8 @@ tar -xzf "$tool_dir/pnpm.tgz" --strip-components=1 -C "$tool_dir/pnpm"
 ln -s "$tool_dir/pnpm/bin/pnpm.cjs" "$tool_dir/node/bin/pnpm"
 export PATH="$tool_dir/node/bin:$PATH"
 export CI=true PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+# Checkout is owned by the host runner; trust only this job's exact workspace.
+export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0="$GITHUB_WORKSPACE"
 node --version
 pnpm --version
 test "$(pnpm --version)" = 10.23.0
