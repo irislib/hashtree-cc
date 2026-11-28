@@ -5,76 +5,10 @@ const manifest = JSON.parse(await readFile(new URL('apps/hashtree-cc/package.jso
 const lockfile = await readFile(new URL('pnpm-lock.yaml', root), 'utf8');
 const workspace = await readFile(new URL('pnpm-workspace.yaml', root), 'utf8');
 
-const releases = {
-  "@iris/release-tools": {
-    "url": "https://github.com/mmalmi/iris-kit/releases/download/runtime-v0.2.12/iris-release-tools-0.1.2.tgz",
-    "integrity": "sha512-ZytyQLbDUYz/IcQ2rvUZZeFvT7FqwhRB3brZtuMwH7ILP/Jvui+ldDnKR8dNxxmIr02+PPyuv+VWKlRyaXCMbg=="
-  },
-  "@fips/browser": {
-    "url": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.63/fips-browser-0.0.23.tgz",
-    "integrity": "sha512-FFcSEhlFbRs8Msg8b8e4S0u2ZTdyXVkiIZeD+fuq1wUpTqt0ONCUqLvfvvx9hQyPwHdlzAsjWxfRUYA4CQ5FAQ=="
-  },
-  "@fips/core": {
-    "url": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.63/fips-core-0.0.58.tgz",
-    "integrity": "sha512-UW0PHboZgifo806XxYYjNGgPsKYDMA59YQSvFD0j1k5lhAofX1Yfx+kH38mTYWeTNJQKSr7cMaWqM1Ue2pSV8g=="
-  },
-  "@fips/tcp": {
-    "url": "https://github.com/mmalmi/fips-tcp/releases/download/fips-tcp-ts-v0.2.6/fips-tcp-0.2.6.tgz",
-    "integrity": "sha512-lXQHNwTZEyXGYWqzRlNyKpb2UgNWJOon6HljbY1F1Ey49Q9IoE/kdF84gaTkrCpMPS8M/A6y5FTaFPOLl60+bw=="
-  },
-  "@fips/transport-webrtc": {
-    "url": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.63/fips-transport-webrtc-0.0.62.tgz",
-    "integrity": "sha512-X4fGxJvosbK62DqW9Zp8mkzMmmH8grVMxKSbtsqgWRCHNIP1nBKQdvmjeYjVG3/KTTVTZXETRQFLSM9ZS2WW7A=="
-  },
-  "@fips/transport-websocket": {
-    "url": "https://github.com/mmalmi/fips-ts/releases/download/runtime-v0.0.63/fips-transport-websocket-0.0.16.tgz",
-    "integrity": "sha512-2KUDBS9/UQ+g+vguCf5hSZBShFGZW9ffXCYXx8jQI9yL9Q8rj8mxd+bnOrv5qAVG8ymbqErI2oVCkyLkpT9cvw=="
-  },
-  "@hashtree/collection": {
-    "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.27/hashtree-collection-0.2.11.tgz",
-    "integrity": "sha512-FI6cVBneXSgOEAEeZH6Yv12eC+pZpG2kTCHc9Bt4+bW6Vu0nVNo5V3Gtt5Dk9p8l7G47sq/R9CBbo6A0D+dVwA=="
-  },
-  "@hashtree/core": {
-    "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.27/hashtree-core-0.4.0.tgz",
-    "integrity": "sha512-hdqjU1MoGjc55BL5WM93jgVxW7cYOWCWHcYUl5glUT8boEinFfmlmnhyjGp7TNwWgxZKQ7Rgag9XiyDnRUGBUA=="
-  },
-  "@hashtree/dexie": {
-    "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.27/hashtree-dexie-0.1.13.tgz",
-    "integrity": "sha512-i34YCDwA+d4puwtC2f+4NreOLRC/RRTOe3PDHXctJvaqg2Ig+xpGcb2I1cbjjCY0cVJ8/BTemNYrH0LfXckPwQ=="
-  },
-  "@hashtree/fips-transport": {
-    "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.52/hashtree-fips-transport-0.5.3.tgz",
-    "integrity": "sha512-aCyAsJwA6uIePNYa7JJtkv/75xcFG/M11LB2llNAiS1qLOz1v3c681XkfHBRmeUqGWoBwyJMBHXmjvQB+vq/Mw=="
-  },
-  "@hashtree/index": {
-    "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.27/hashtree-index-0.1.15.tgz",
-    "integrity": "sha512-EnXs4hE0fxCzQfruEsjO9YVBTpzb3Rr1k1vF6p7gLgpZ2oIEg4DEv/pZji9uj7/qJYqOa+EsZTjA0lT0SZozdA=="
-  },
-  "@hashtree/mesh": {
-    "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.27/hashtree-mesh-0.3.3.tgz",
-    "integrity": "sha512-fiLvKjbEO1J/fuj6wcLGjI3RPsPrGgSuc2O+QqN/vX3OSHI7uPS+feH49vFduUMHYM79Yvsrq6MV2XDUiGq59A=="
-  },
-  "@hashtree/nostr": {
-    "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.40/hashtree-nostr-0.2.7.tgz",
-    "integrity": "sha512-ah0pS1PDckTkz/QntsNn9D9aFPcJWb7BDjBvaVtY9gaWryiWMvXv0QaGbTU5aGIqRd32BLmnojNDXHPJ/IkIhQ=="
-  },
-  "@hashtree/nostr-pubsub": {
-    "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.27/hashtree-nostr-pubsub-0.1.9.tgz",
-    "integrity": "sha512-7QfJ1LwAYb8ThdA/ECXJQYxh7BjQk/gTQS+XAfnZvzjxx5YSDRjGj+7bqLtbDdIAPDuIA9dUNYCfH8oj9RLdPQ=="
-  },
-  "@hashtree/worker": {
-    "url": "https://github.com/mmalmi/hashtree/releases/download/hashtree-ts-runtime-v0.5.41/hashtree-worker-0.4.25.tgz",
-    "integrity": "sha512-viUPl2JUtrfJENEWZPvaTtT5x73Pvj5EmHn7qjsTP5T01uOg0tDm7xJww3cf6x23LILi6drOh97ss0WWYq/KVA=="
-  },
-  "nostr-pubsub": {
-    "url": "https://registry.npmjs.org/nostr-pubsub/-/nostr-pubsub-0.5.42.tgz",
-    "integrity": "sha512-kuEV8FVRU3zPtwTgG95JhztEkPBPV4wQ8Jv+pD6EHF/UfKS/3RpsB/q/+yd6ms9CM/obdbh6xNItOUrSvvBusw=="
-  },
-  "nostr-social-graph": {
-    "url": "https://github.com/mmalmi/nostr-social-graph/releases/download/v4.1.0/nostr-social-graph-4.1.0.tgz",
-    "integrity": "sha512-9jHMueBoZOsgsI80XWh4oirJTxoOsvTEs1JvlyIQkrw78ykOi3725fXOmSCKmULyS5vHioitAToOkBru5u1Jcw=="
-  }
-};
+const cohort = JSON.parse(await readFile(new URL('scripts/runtime-pins.json', root), 'utf8'));
+const rootManifest = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
+const releases = { ...cohort.packages, '@iris/release-tools': {"url": "https://github.com/mmalmi/iris-kit/releases/download/runtime-v0.2.12/iris-release-tools-0.1.2.tgz", "integrity": "sha512-ZytyQLbDUYz/IcQ2rvUZZeFvT7FqwhRB3brZtuMwH7ILP/Jvui+ldDnKR8dNxxmIr02+PPyuv+VWKlRyaXCMbg=="} };
+const unused = new Set(['@hashtree/git', '@hashtree/merge', '@fips/transport-memory', '@fips/transport-ethernet']);
 
 for (const name of [
   '@fips/browser',
@@ -108,6 +42,7 @@ if (workspace.includes("'packages/*'") || workspace.includes('"packages/*"')) {
 }
 
 for (const [name, release] of Object.entries(releases)) {
+  if (unused.has(name)) continue;
   const quotedKey = `  '${name}@${release.url}':`;
   const plainKey = `  ${name}@${release.url}:`;
   const start = Math.max(lockfile.indexOf(quotedKey), lockfile.indexOf(plainKey));
@@ -115,6 +50,28 @@ for (const [name, release] of Object.entries(releases)) {
   const entry = start >= 0 ? lockfile.slice(start, end < 0 ? undefined : end) : '';
   if (!entry.includes(`tarball: ${release.url}`) || !entry.includes(`integrity: ${release.integrity}`)) {
     throw new Error(`${name} lock entry is missing its verified release integrity`);
+  }
+}
+
+// Reject stale nested records, even when a correct direct lock row also exists.
+for (const [name, release] of Object.entries(cohort.packages)) {
+  if (name === '@hashtree/git' || name === '@hashtree/merge') continue;
+  if (rootManifest.pnpm?.overrides?.[name] !== release.url) {
+    throw new Error(`${name} must override every nested consumer to the accepted release`);
+  }
+}
+for (const [selector, value] of Object.entries(rootManifest.pnpm?.overrides ?? {})) {
+  const target = selector.split('>').at(-1);
+  if (cohort.packages[target] && value !== cohort.packages[target].url) {
+    throw new Error(`Stale cohort override: ${selector}`);
+  }
+}
+for (const line of lockfile.split('\n')) {
+  const match = line.match(/^  '?((?:@(?:hashtree|fips)\/[^@':]+|nostr-pubsub|nostr-social-graph))@([^']+)'?:$/);
+  if (!match || !cohort.packages[match[1]]) continue;
+  const expected = cohort.packages[match[1]].url;
+  if (match[2] !== expected && !match[2].startsWith(`${expected}(`)) {
+    throw new Error(`Stale nested cohort package: ${match[1]}@${match[2]}`);
   }
 }
 
