@@ -214,3 +214,4 @@ test('parses htree publish output defensively', () => {
   );
 });
 import './deployTool.test.mjs';
+import './runtimePins.test.mjs';

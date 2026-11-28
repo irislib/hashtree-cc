@@ -67,7 +67,7 @@ for (const [selector, value] of Object.entries(rootManifest.pnpm?.overrides ?? {
   }
 }
 for (const line of lockfile.split('\n')) {
-  const match = line.match(/^  '?((?:@(?:hashtree|fips)\/[^@':]+|nostr-pubsub|nostr-social-graph))@([^']+)'?:$/);
+  const match = line.match(/^  '?((?:@(?:hashtree|fips)\/[^@':]+|nostr-pubsub|nostr-social-graph))@([^']+)'?:(?: \{\})?$/);
   if (!match || !cohort.packages[match[1]]) continue;
   const expected = cohort.packages[match[1]].url;
   if (match[2] !== expected && !match[2].startsWith(`${expected}(`)) {

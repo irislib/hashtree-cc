@@ -39,16 +39,11 @@ test "$(pnpm --version)" = 10.23.0
 git rev-parse HEAD > ci-evidence/source-commit.txt
 sha256sum pnpm-lock.yaml > ci-evidence/lock-before.sha256
 
-if [[ -f .github/resolve-runtime-lock ]]; then
-  pnpm install --lockfile-only --ignore-scripts --store-dir "$RUNNER_TEMP/hashtree-cc-pnpm-store"
-  cp pnpm-lock.yaml ci-evidence/resolved-pnpm-lock.yaml
-  git diff -- pnpm-lock.yaml > ci-evidence/resolved-lock.patch
-  echo 'Lock metadata preparation only; no website qualification or install performed.'
-  exit 0
-fi
-
+node scripts/verify-dependency-lock.mjs
 pnpm install --frozen-lockfile --store-dir "$RUNNER_TEMP/hashtree-cc-pnpm-store"
 check_capacity 21
+node scripts/verify-runtime-edges.mjs
+python3 scripts/verify-installed-runtime.py
 pnpm build
 pnpm test:release
 # Reuse the exact build above for portable and browser checks.

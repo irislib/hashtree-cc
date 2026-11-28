@@ -11,7 +11,7 @@ import {
   type TransportAddress,
   type TransportContext,
 } from '@fips/core';
-// CC consumes the accepted WebSocket transport through its worker package.
+// CC consumes the accepted WebSocket transport through its FIPS provider.
 // Resolve the installed manifest exactly as the hosted dependency proof does.
 function manifestPath(name: string, importer: ReturnType<typeof createRequire>): string {
   for (const directory of importer.resolve.paths(name) ?? []) {
@@ -21,8 +21,8 @@ function manifestPath(name: string, importer: ReturnType<typeof createRequire>):
   throw new Error(`Missing installed fixture dependency: ${name}`);
 }
 const appRequire = createRequire(import.meta.url);
-const workerRequire = createRequire(manifestPath('@hashtree/worker', appRequire));
-const websocketManifest = manifestPath('@fips/transport-websocket', workerRequire);
+const providerRequire = createRequire(manifestPath('@hashtree/fips-transport', appRequire));
+const websocketManifest = manifestPath('@fips/transport-websocket', providerRequire);
 const {
   decodeLocalKeyHint,
   encodeLocalKeyHintResponse,
